@@ -24,7 +24,6 @@ class Contact:
             full_name=data.get("full_name", ""),
             phone=data.get("phone"),
             email=data.get("email"),
-            # Metni Enum nesnesine çeviriyoruz
             category=ContactCategory(data.get("category", "Potansiyel")),
             notes=data.get("notes")
         )
