@@ -39,8 +39,8 @@ class Property:
     def to_dict(self):
         return {
             "title": self.title,
-            "type": self.property_type.value, # Veritabanına metin olarak gönderiyoruz
-            "status": self.status.value,     # Veritabanına metin olarak gönderiyoruz
+            "type": self.property_type.value,
+            "status": self.status.value,
             "price": self.price,
             "owner_id": self.owner_id,
             "address": self.address
