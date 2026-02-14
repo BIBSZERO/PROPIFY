@@ -29,6 +29,17 @@ class DatabaseManager:
         except Exception as e:
             print(f"❌ Veri çekme hatası ({table_name}): {e}")
             return None
+    
+    def get_joined_data(self, table_name: str, joined_query: str) -> Any:
+        """
+        İlişkili tablolarla birlikte veri çeker. 
+        Örn: get_joined_data('properties', '*, profiles(full_name)')
+        """
+        try:
+            return self.client.table(table_name).select(joined_query).execute()
+        except Exception as e:
+            print(f"❌ İlişkili veri çekme hatası ({table_name}): {e}")
+            return None
 
     def get_filtered_data(self, table_name: str, column: str, value: Any) -> Any:
         """Belirli bir sütuna göre filtreleme yaparak veri getirir."""
@@ -36,6 +47,14 @@ class DatabaseManager:
             return self.client.table(table_name).select("*").eq(column, value).execute()
         except Exception as e:
             print(f"❌ Filtreli veri çekme hatası ({table_name}): {e}")
+            return None
+
+    def get_search_data(self, table_name: str, column: str, search_term: str) -> Any:
+        """Metin tabanlı arama yapar (Büyük/küçük harf duyarsız - ILIKE)."""
+        try:
+            return self.client.table(table_name).select("*").ilike(column, f"{search_term}%").execute()
+        except Exception as e:
+            print(f"❌ Arama hatası ({table_name}): {e}")
             return None
 
     # --- VERİ EKLEME (CREATE) ---
@@ -64,6 +83,21 @@ class DatabaseManager:
         except Exception as e:
             print(f"❌ Veri silme hatası ({table_name}): {e}")
             return None
+        
+    # --- KULLANICI PROFİL İŞLEMLERİ ---
+    def get_user_profile(self, user_id: str) -> Any:
+        try:
+            return self.client.table("profiles").select("*").eq("id", user_id).single().execute()
+        except Exception as e:
+            print(f"❌ Profil çekme hatası: {e}")
+            return None
+        
+    def upsert_user_profile(self, profile_data: Dict[str, Any]) -> Any:
+        try:
+            return self.client.table("profiles").upsert(profile_data).execute()
+        except Exception as e:
+            print(f"❌ Profil güncelleme hatası: {e}")
+            return None
 
-# Uygulama genelinde kullanılacak Singleton nesnesi
+
 db = DatabaseManager()
