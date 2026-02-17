@@ -8,7 +8,7 @@ load_dotenv()
 
 class DatabaseManager:
     """
-    PPOPIFY Merkezi Veritabanı Yöneticisi.
+    PROPIFY Merkezi Veritabanı Yöneticisi.
     Supabase ile tüm CRUD işlemlerini tip güvenliğiyle yönetir.
     """
     
@@ -22,19 +22,16 @@ class DatabaseManager:
         self.client: Client = create_client(url, key)
 
     # --- VERİ OKUMA (READ) ---
-    def get_data(self, table_name: str, select_query: str = "*") -> Any:
-        """Tablodaki tüm verileri veya seçili sütunları getirir."""
+    def get_data(self, table_name: str, select_query: str = "*", order_by: str = "created_at") -> Any:
+        """Tablodaki verileri getirir ve varsayılan olarak tarihe göre sıralar."""
         try:
-            return self.client.table(table_name).select(select_query).execute()
+            return self.client.table(table_name).select(select_query).order(order_by, desc=True).execute()
         except Exception as e:
             print(f"❌ Veri çekme hatası ({table_name}): {e}")
             return None
     
     def get_joined_data(self, table_name: str, joined_query: str) -> Any:
-        """
-        İlişkili tablolarla birlikte veri çeker. 
-        Örn: get_joined_data('properties', '*, profiles(full_name)')
-        """
+        """İlişkili tablolarla birlikte veri çeker."""
         try:
             return self.client.table(table_name).select(joined_query).execute()
         except Exception as e:
@@ -42,7 +39,7 @@ class DatabaseManager:
             return None
 
     def get_filtered_data(self, table_name: str, column: str, value: Any) -> Any:
-        """Belirli bir sütuna göre filtreleme yaparak veri getirir."""
+        """Belirli bir sütuna göre tam eşleşme filtrelemesi yapar."""
         try:
             return self.client.table(table_name).select("*").eq(column, value).execute()
         except Exception as e:
@@ -50,16 +47,16 @@ class DatabaseManager:
             return None
 
     def get_search_data(self, table_name: str, column: str, search_term: str) -> Any:
-        """Metin tabanlı arama yapar (Büyük/küçük harf duyarsız - ILIKE)."""
+        """Metin tabanlı arama yapar (Kelimenin herhangi bir yerinde geçmesi yeterlidir)."""
         try:
-            return self.client.table(table_name).select("*").ilike(column, f"{search_term}%").execute()
+            # Başına ve sonuna % ekleyerek 'içerir' mantığına çevirdik
+            return self.client.table(table_name).select("*").ilike(column, f"%{search_term}%").execute()
         except Exception as e:
             print(f"❌ Arama hatası ({table_name}): {e}")
             return None
 
     # --- VERİ EKLEME (CREATE) ---
     def insert_data(self, table_name: str, data: Dict[str, Any]) -> Any:
-        """Tabloya yeni bir satır ekler."""
         try:
             return self.client.table(table_name).insert(data).execute()
         except Exception as e:
@@ -68,7 +65,6 @@ class DatabaseManager:
 
     # --- VERİ GÜNCELLEME (UPDATE) ---
     def update_data(self, table_name: str, data: Dict[str, Any], row_id: Union[str, int]) -> Any:
-        """Belirli bir ID'ye sahip satırı günceller."""
         try:
             return self.client.table(table_name).update(data).eq("id", row_id).execute()
         except Exception as e:
@@ -77,7 +73,6 @@ class DatabaseManager:
 
     # --- VERİ SİLME (DELETE) ---
     def delete_data(self, table_name: str, row_id: Union[str, int]) -> Any:
-        """Belirli bir ID'ye sahip satırı siler."""
         try:
             return self.client.table(table_name).delete().eq("id", row_id).execute()
         except Exception as e:
@@ -98,6 +93,5 @@ class DatabaseManager:
         except Exception as e:
             print(f"❌ Profil güncelleme hatası: {e}")
             return None
-
 
 db = DatabaseManager()
