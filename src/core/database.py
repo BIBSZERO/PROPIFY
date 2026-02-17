@@ -20,6 +20,14 @@ class DatabaseManager:
             raise ValueError("Hata: .env dosyasında SUPABASE_URL veya KEY eksik!")
             
         self.client: Client = create_client(url, key)
+    
+    def get_auth(self):
+        """Supabase Auth sistemine erişim sağlar."""
+        return self.client.auth
+    
+    def get_table(self, table_name:str):
+        """Tabloya erişim sağlar."""
+        return self.client.table(table_name)
 
     # --- VERİ OKUMA (READ) ---
     def get_data(self, table_name: str, select_query: str = "*", order_by: str = "created_at") -> Any:
