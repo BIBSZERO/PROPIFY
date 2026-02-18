@@ -22,30 +22,64 @@ class UIHelpers:
             page.update()
         except Exception as e:
             print(f"❌ Toast hatası: {e}")
+
+    @staticmethod
+    def loader_dialog(page: ft.Page, message: str = "Lütfen Bekleyin..."):
+        """Veri işlenirken ekranı kilitleyen yükleme ekranı."""
+        try:
+            dialog = ft.AlertDialog(
+                modal=True,
+                content=ft.Column(
+                    [
+                        ft.ProgressRing(width=40, height=40, stroke_width=4, color=ft.Colors.BLUE_700),
+                        ft.Text(message, size=16, weight=ft.FontWeight.W_400)
+                    ],
+                    tight=True,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=20
+                )
+            )
+            page.add(dialog)
+            dialog.open = True
+            return dialog
+        
+        except Exception as e:
+            print(f"❌ Loader hatası: {e}")
+            return None
+        
+    @staticmethod
+    def close_dialog(page: ft.Page, dialog: ft.AlertDialog):
+        """Spesifik bir diyalog penceresini güvenli bir şekilde kapatır."""
+       
     
 if __name__ == "__main__":
-    def test_main(page: ft.Page):
-        page.title = "UIHelpers Test Alanı"
-        page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    def main(page: ft.Page):
+        page.title = "PROPIFY UI Test"
         page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-
-        # Başarılı mesaj testi
-        success_btn = ft.ElevatedButton(
-            "Başarı Mesajı Göster",
-            on_click=lambda _:UIHelpers.show_toast(page, "İşlem başarıyla tamamlandı!!!", True),
-        )
-
-        # Hata mesajı testi
-        error_btn = ft.ElevatedButton(
-            "Hata Mesajı Göster",
-            on_click=lambda _:UIHelpers.show_toast(page, "Bir şeyler ters gitti!", False),
-        )
-
+        page.vertical_alignment = ft.MainAxisAlignment.CENTER
+        
         page.add(
-            ft.Text("UIHelpers SnackBar Testi", size=20, weight=ft.FontWeight.BOLD),
-            ft.Row([success_btn, error_btn], alignment=ft.MainAxisAlignment.CENTER)
+            ft.Text("UIHelpers Test Ekranı", size=25, weight=ft.FontWeight.BOLD),
+            ft.ElevatedButton(
+                "Başarılı Toast", 
+                on_click=lambda _: UIHelpers.show_toast(page, "İşlem Tamam!", True)
+            ),
+            ft.ElevatedButton(
+                "Hatalı Toast", 
+                on_click=lambda _: UIHelpers.show_toast(page, "Hata Oluştu!", False)
+            ),
+            ft.ElevatedButton(
+                "Yükleme Ekranını Aç (2 sn)", 
+                on_click=lambda _: test_loader(page)
+            )
         )
 
-ft.app(target=test_main)
+    def test_loader(page):
+        import time
+        loader = UIHelpers.loader_dialog(page, "Veriler çekiliyor...")
+        time.sleep(2) # Test için bekletme
+        UIHelpers.close_dialog(page, loader)
+
+ft.app(target=main)
 
 # Çalıştırma komutu : python -m src.utils.ui_helpers
