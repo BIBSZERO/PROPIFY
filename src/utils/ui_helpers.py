@@ -50,36 +50,31 @@ class UIHelpers:
     @staticmethod
     def close_dialog(page: ft.Page, dialog: ft.AlertDialog):
         """Spesifik bir diyalog penceresini güvenli bir şekilde kapatır."""
-       
+        try:
+            if dialog:
+                dialog.open = False
+                page.update()
+        except Exception as e:
+            print(f"❌ Dialog kapatma hatası: {e}")
     
-if __name__ == "__main__":
-    def main(page: ft.Page):
-        page.title = "PROPIFY UI Test"
-        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-        page.vertical_alignment = ft.MainAxisAlignment.CENTER
-        
-        page.add(
-            ft.Text("UIHelpers Test Ekranı", size=25, weight=ft.FontWeight.BOLD),
-            ft.ElevatedButton(
-                "Başarılı Toast", 
-                on_click=lambda _: UIHelpers.show_toast(page, "İşlem Tamam!", True)
-            ),
-            ft.ElevatedButton(
-                "Hatalı Toast", 
-                on_click=lambda _: UIHelpers.show_toast(page, "Hata Oluştu!", False)
-            ),
-            ft.ElevatedButton(
-                "Yükleme Ekranını Aç (2 sn)", 
-                on_click=lambda _: test_loader(page)
+    @staticmethod
+    def create_stat_card(title: str, value: str, icon: ft.IconData, color: str = ft.Colors.BLUE_700) -> ft.Container:
+        """Dashboard üzerindeki özet bilgi kartları (İlan Sayısı, Randevular vb.)."""
+        return ft.Container(
+            content=ft.Column([
+                ft.ListTile(
+                    leading=ft.Icon(icon, color=color, size=35),
+                    title=ft.Text(value, size=24, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_GREY_800),
+                    subtitle=ft.Text(title, size=14, color=ft.Colors.BLUE_GREY_400)
+                )
+            ]),
+            width=220,
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=15,
+            shadow=ft.BoxShadow(
+                blur_radius=15, 
+                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
+                offset=ft.Offset(0, 5)
             )
         )
-
-    def test_loader(page):
-        import time
-        loader = UIHelpers.loader_dialog(page, "Veriler çekiliyor...")
-        time.sleep(2) # Test için bekletme
-        UIHelpers.close_dialog(page, loader)
-
-ft.app(target=main)
-
-# Çalıştırma komutu : python -m src.utils.ui_helpers
