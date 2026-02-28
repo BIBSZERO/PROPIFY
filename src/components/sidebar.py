@@ -3,7 +3,7 @@ import flet as ft
 class SideBar(ft.Container):
     def __init__(self, page):
         super().__init__()
-        self.page = page
+        self.main_page = page
         self.width = 250
         self.bgcolor = "#1A237E"
         self.border_radius = ft.border_radius.only(top_right=30)
