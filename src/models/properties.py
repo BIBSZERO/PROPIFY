@@ -1,6 +1,6 @@
 from enum import Enum
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Optional, List
 
 class PropertyType(Enum):
     DAIRE = "Daire"
@@ -23,6 +23,8 @@ class Property:
     price: float = 0.0
     owner_id: Optional[str] = None
     address: Optional[str] = None
+    # 📸 Görsel URL'lerini tutacak yeni alanımız
+    images: List[str] = field(default_factory=list)
 
     @staticmethod
     def from_dict(data: dict):
@@ -33,7 +35,9 @@ class Property:
             status=PropertyStatus(data.get("status", "Aktif")),
             price=float(data.get("price", 0)),
             owner_id=data.get("owner_id"),
-            address=data.get("address")
+            address=data.get("address"),
+            # 🕵️ Veritabanından gelen images listesini al, yoksa boş liste döndür
+            images=data.get("images", [])
         )
     
     def to_dict(self):
@@ -43,5 +47,7 @@ class Property:
             "status": self.status.value,
             "price": self.price,
             "owner_id": self.owner_id,
-            "address": self.address
+            "address": self.address,
+            # 🚀 Veritabanına gönderilecek görseller
+            "images": self.images
         }

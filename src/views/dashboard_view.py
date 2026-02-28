@@ -2,6 +2,8 @@ import flet as ft
 from src.components.sidebar import SideBar
 from src.components.top_bar import TopBar
 from src.components.stat_card import StatCard
+from src.components.property_card import PropertyCard
+from src.services.property_service import PropertyService
 
 class DashboardView(ft.View):
     def __init__(self, page: ft.Page):
@@ -12,60 +14,70 @@ class DashboardView(ft.View):
         )
         self.main_page = page
 
-        # 1. SOL MENÜ (Sidebar - Bileşenimiz)
+        # VERİLERİ SERVİSTEN ÇEK
+        self.properties = PropertyService.get_all()
+
+        # Sidebar
         self.sidebar = SideBar(self.main_page)
 
-        # 2. ANA İÇERİK ALANI (Header + Stats + Grid)
+        # İlan Gridi (İlanları yan yana dizer)
+        self.property_grid = ft.Row(
+            wrap=True,
+            spacing=25,
+            run_spacing=25,
+            controls=[PropertyCard(p) for p in self.properties] if self.properties else[]
+        )
+
+        # Ana Sütun (Header + Stats + Grid)
         self.content_column = ft.Column([
-            # Üst Bar (Bileşenimiz)
-            TopBar(self.main_page),
-            
-            # İstatistik Kartları (Bileşenlerimiz)
+            TopBar(self.main_page), # Dinamik isim çeken birleşen
+
+            # İstatistikler
             ft.Container(
                 content=ft.Row([
-                    StatCard("Aktif Portföy", "12", ft.Icons.HOME_ROUNDED, ft.Colors.BLUE),
+                    StatCard("Aktif Portföy", str(len(self.properties)), ft.Icons.HOME_ROUNDED, ft.Colors.BLUE),
                     StatCard("Görüntülenme", "1.2K", ft.Icons.AUTO_GRAPH, ft.Colors.GREEN),
-                    StatCard("Yeni Talepler", "5", ft.Icons.CHAT_BUBBLE_OUTLINE, ft.Colors.ORANGE),
+                    StatCard("Talepler", "5", ft.Icons.CHAT_BUBBLE_OUTLINE, ft.Colors.ORANGE),
                 ], spacing=20),
-                padding=ft.padding.only(left=20, right=20, bottom=10)
+                padding=20
             ),
 
-            # İlan Vitrini Alanı
+            #İlan Vitrini
             ft.Container(
                 content=ft.Column([
                     ft.Row([
-                        ft.Text("Son İlanlar", size=20, weight=ft.FontWeight.BOLD, color="#1A237E"),
-                        ft.TextButton("Tümünü Gör", icon=ft.Icons.ARROW_FORWARD)
+                        ft.Text("Son İlanlar", size=22, weight=ft.FontWeight.BOLD, color="#1A237E"),
+                        ft.TextButton("Tümünü Gör", icon=ft.Icons.ARROW_FORWARD),
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                    
-                    # 🕵️ BURASI ÖNEMLİ: İlanlar eklendikçe burası dolacak. 
-                    # Şimdilik Saatçiler Konağı için bir yer tutucu (placeholder) koyuyoruz.
-                    ft.Container(
-                        content=ft.Column([
-                            ft.Icon(ft.Icons.ADD_BUSINESS_OUTLINED, size=50, color=ft.Colors.GREY_400),
-                            ft.Text("Henüz ilan eklenmedi.", color=ft.Colors.GREY_600),
-                            ft.ElevatedButton(
-                                "İlk İlanı Oluştur", 
-                                icon=ft.Icons.ADD,
-                                on_click=lambda _: print("İlan ekleme sayfasına git")
-                            )
-                        ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-                        padding=50,
-                        alignment=ft.Alignment.CENTER,
-                        border=ft.border.all(1, ft.Colors.GREY_300),
-                        border_radius=15,
-                        width=1000 # Genişliği ayarla
-                    )
+                    ft.Divider(height=10, color="transparent"),
+
+                    # Eğer veri varsa girdi göster, yoksa boş durum göster
+                    self.property_grid if self.properties else self.build_empty_state()
                 ]),
                 padding=20,
                 expand=True
             )
-        ], expand=True, spacing=0, scroll=ft.ScrollMode.ADAPTIVE)
+        ], expand=True, scroll=ft.ScrollMode.ADAPTIVE)
 
-        # 🛠️ Dashboard Kompozisyonu
         self.controls = [
             ft.Row([
-                self.sidebar,        # Sol Menü
-                self.content_column  # Sağ İçerik
+                self.sidebar,
+                self.content_column
             ], expand=True, spacing=0)
         ]
+    def build_empty_state(self):
+        """İlan bulunmadığında gösterilecek alan"""
+        return ft.Container(
+            content=ft.Column([
+                ft.Icon(ft.Icons.ADD_BUSINESS_OUTLINED, size=60, color=ft.Colors.GREY_400),
+                ft.Text("Henüz bir portföy eklenmemiş.", color=ft.Colors.GREY_600, size=16),
+                ft.ElevatedButton(
+                    "İlk İlanı Hemen Ekle",
+                    icon=ft.Icons.ADD,
+                    on_click=lambda _: self.main_page.go("/add-property"),
+                    style=ft.ButtonStyle(color=ft.Colors.WHITE, bgcolor="#1A237E")
+                )
+            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+            padding=100,
+            alignment=ft.Alignment.CENTER
+        )
