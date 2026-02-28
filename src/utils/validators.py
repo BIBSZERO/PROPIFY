@@ -5,6 +5,11 @@ import re
 
 class Validators:
     @staticmethod
+    def is_empty(text: str) -> bool:
+        """Metnin boş olup olmadığını kontrol eder."""
+        return not text or text.strip() == ""
+    
+    @staticmethod
     def is_valid_email(email: str) -> bool:
         """E-posta formatını kontrol eder."""
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'

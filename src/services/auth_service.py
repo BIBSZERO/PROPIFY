@@ -25,6 +25,24 @@ class AuthService:
         except Exception as e:
             print(f"❌ Giriş hatası: {e}")
             return None
+    
+    def reset_password(self, email: str) -> bool:
+        try:
+            db.get_auth().reset_password_for_email(email)
+            print(f"📧 Şifre sıfırlama maili gönderildi: {email}")
+            return True
+        except Exception as e:
+            print(f"❌ Şifre sıfırlama hatası: {e}")
+            return False
+    
+    def update_password(self, new_password: str) -> bool:
+        try:
+            db.get_auth().update_user({"password": new_password})
+            print("✅ Şifre başarıyla güncellendi.")
+            return True
+        except Exception as e:
+            print(f"❌ Şifre güncelleme hatası: {e}")
+            return False
         
     def register(self, email: str, password: str) -> Optional[str]:
         """
