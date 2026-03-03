@@ -15,9 +15,3 @@ class AddPropertyView(ft.View):
             padding=0
         )
         self.main_page = page
-
-        self.controls = [
-            ft.Row([
-                ft.Text("Burası Add Property")
-            ])
-        ]
