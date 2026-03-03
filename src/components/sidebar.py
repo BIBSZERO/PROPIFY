@@ -14,7 +14,7 @@ class SideBar(ft.Container):
             ft.Container(height=20),
             self.nav_item(ft.Icons.DASHBOARD, "Genel Bakış", True),
             self.nav_item(ft.Icons.HOME_WORK, "Portföyler", False),
-            self.nav_item(ft.Icons.ADD_CIRCLE, "Yeni İlan", False),
+            self.nav_item(ft.Icons.ADD_CIRCLE, "Yeni İlan", True, on_click=lambda _: self.page.go("/add-property")),
             self.nav_item(ft.Icons.PERSON, "Profil", False),
             ft.Container(expand=True),
             self.nav_item(ft.Icons.LOGOUT, "Çıkış", False, on_click=lambda _: self.page.go("/")),

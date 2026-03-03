@@ -5,6 +5,7 @@ from typing import Optional
 from src.views.login_view import LoginView
 from src.views.dashboard_view import DashboardView
 from src.views.password_reset_view import PasswordResetView
+from src.views.add_property_view import AddPropertyView
 
 def main(page: ft.Page):
     page.title = "PROPIFY"
@@ -39,6 +40,8 @@ def main(page: ft.Page):
             page.views.append(PasswordResetView(page))
         elif current_route == "/dashboard":
             page.views.append(DashboardView(page))
+        elif current_route == "/add-property":
+            page.views.append(AddPropertyView(page))
         else:
             page.views.append(LoginView(page))
         
