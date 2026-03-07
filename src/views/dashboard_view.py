@@ -52,7 +52,11 @@ class DashboardView(ft.View):
                     ft.Divider(height=10, color="transparent"),
 
                     # Eğer veri varsa girdi göster, yoksa boş durum göster
-                    self.property_grid if self.properties else self.build_empty_state()
+                    ft.Row([
+                        ft.Column([
+                            self.property_grid if self.properties else self.build_empty_state()
+                        ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True)
+                    ],alignment=ft.MainAxisAlignment.CENTER),     
                 ]),
                 padding=20,
                 expand=True
