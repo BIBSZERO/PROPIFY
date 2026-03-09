@@ -99,7 +99,7 @@ class AddPropertyView(ft.View):
             self.client_dropdown.options = [
                 ft.dropdown.Option(
                     key=str(c.id), 
-                    text=getattr(c, "name", f"Müşteri {c.id}")
+                    text=str(c.full_name) if c.full_name else f"İsimsiz Müşteri ({c.id})"
                 ) for c in contacts
             ]
         except Exception as e:
