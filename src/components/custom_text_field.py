@@ -6,18 +6,29 @@ class CustomTextField(ft.TextField):
         label: str,
         icon: ft.IconData,
         is_password: bool = False,
-        hint_text: str = ""
+        is_numeric: bool = False, # Sayısal giriş desteği ekledik
+        hint_text: str = "",
+        expand: bool = False,
+        multiline: bool = False
     ):
         super().__init__(
             label=label,
             hint_text=hint_text,
             prefix_icon=icon,
             password=is_password,
+            can_reveal_password=is_password, # Şifre ise otomatik göz ikonu çıkar
             border_radius=12,
             border_color=ft.Colors.BLUE_700,
             focused_border_color=ft.Colors.ORANGE_700,
             bgcolor=ft.Colors.WHITE,
             text_size=14,
-            height=60,
+            height=60 if not multiline else None, # Çok satırlıysa yüksekliği serbest bırak
             cursor_color=ft.Colors.BLUE_700,
+            expand=expand,
+            multiline=multiline,
         )
+        
+        # 🚀 Sayısal giriş (Telefon, Fiyat vb.) için filtre
+        if is_numeric:
+            self.keyboard_type = ft.KeyboardType.NUMBER
+            self.input_filter = ft.NumbersOnlyInputFilter()

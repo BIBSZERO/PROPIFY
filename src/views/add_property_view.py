@@ -2,6 +2,7 @@ import flet as ft
 from src.components.sidebar import SideBar
 from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
+from src.components.add_client_dialog import AddClientDialog
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
 from src.models.properties import Property, PropertyType, PropertyStatus
@@ -23,6 +24,11 @@ class AddPropertyView(ft.View):
             expand=True,
             border_radius=12,
             border_color="#1A237E",
+        )
+
+        self.add_client_dialog = AddClientDialog(
+            page=self.main_page, 
+            on_success=self.load_initial_data 
         )
 
         # Mülk Türü
@@ -60,6 +66,12 @@ class AddPropertyView(ft.View):
                             
                             ft.Row([
                                 self.client_dropdown,
+                                ft.IconButton(
+                                    icon=ft.Icons.ADD_CIRCLE_OUTLINE,
+                                    icon_color="#1A237E",
+                                    tooltip="Yeni Müşteri Ekle",
+                                    on_click=lambda _: self.add_client_dialog.show()
+                                ),
                             ], spacing=10),
                             
                             # Tür ve Durum Seçimi Yan Yana
@@ -93,17 +105,16 @@ class AddPropertyView(ft.View):
         self.load_initial_data()
 
     def load_initial_data(self):
-        """Müşteri listesini dropdown'a doldurur."""
+        """Müşteri listesini yeniler."""
         try:
             contacts = contact_service.get_all()
             self.client_dropdown.options = [
-                ft.dropdown.Option(
-                    key=str(c.id), 
-                    text=str(c.full_name) if c.full_name else f"İsimsiz Müşteri ({c.id})"
-                ) for c in contacts
+                ft.dropdown.Option(key=str(c.id), text=str(c.full_name)) 
+                for c in contacts
             ]
+            self.main_page.update()
         except Exception as e:
-            print(f"Veri yükleme hatası: {e}")
+            print(f"Yükleme hatası: {e}")
 
     async def save_property(self):
         """İlanı kaydeder."""
