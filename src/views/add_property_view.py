@@ -17,6 +17,8 @@ class AddPropertyView(ft.View):
         self.listing_no_input = CustomTextField(label="İlan No", icon=ft.Icons.NUMBERS)
         self.price_input = CustomTextField(label="Fiyat (TL)", icon=ft.Icons.ATTACH_MONEY)
         self.price_input.input_filter = ft.NumbersOnlyInputFilter()
+        self.m2_gross_input = CustomTextField(label="Brüt M2", icon=ft.Icons.SQUARE_FOOT, is_numeric=True)
+        self.m2_net_input = CustomTextField(label="Net M2", icon=ft.Icons.SQUARE_FOOT, is_numeric=True)
         
         # Müşteri Seçimi (Dropdown)
         self.client_dropdown = ft.Dropdown(
@@ -61,6 +63,11 @@ class AddPropertyView(ft.View):
                                 self.title_input,
                                 self.listing_no_input,
                             ], spacing=20),
+
+                            ft.Row([
+                                self.m2_gross_input,
+                                self.m2_net_input
+                            ], spacing=10),
                             
                             ft.Row([
                                 self.client_dropdown,
@@ -140,6 +147,8 @@ class AddPropertyView(ft.View):
             listing_no=listing_no,
             title=str(self.title_input.value),
             price=float(self.price_input.value or 0),
+            m2_gross=int(self.m2_gross_input.value or 0),
+            m2_net=int(self.m2_net_input.value or 0),
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],
