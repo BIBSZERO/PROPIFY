@@ -17,6 +17,7 @@ class PropertyStatus(Enum):
 @dataclass
 class Property:
     id: Optional[str] = None
+    listing_no: str = ""
     title: str = ""
     property_type: PropertyType = PropertyType.DAIRE
     status: PropertyStatus = PropertyStatus.AKTIF
@@ -30,6 +31,7 @@ class Property:
     def from_dict(data: dict):
         return Property(
             id=data.get("id"),
+            listing_no=data.get("listing_no", ""),
             title=data.get("title", ""),
             property_type=PropertyType(data.get("type", "Daire")),
             status=PropertyStatus(data.get("status", "Aktif")),
@@ -42,6 +44,7 @@ class Property:
     
     def to_dict(self):
         return {
+            "listing_no": self.listing_no,
             "title": self.title,
             "type": self.property_type.value,
             "status": self.status.value,

@@ -14,6 +14,7 @@ class AddPropertyView(ft.View):
 
         # --- 1. FORM BİLEŞENLERİ ---
         self.title_input = CustomTextField(label="İlan Başlığı", icon=ft.Icons.TITLE)
+        self.listing_no_input = CustomTextField(label="İlan No", icon=ft.Icons.NUMBERS)
         self.price_input = CustomTextField(label="Fiyat (TL)", icon=ft.Icons.ATTACH_MONEY)
         self.price_input.input_filter = ft.NumbersOnlyInputFilter()
         
@@ -57,6 +58,7 @@ class AddPropertyView(ft.View):
                             ft.Divider(height=10),
                             
                             self.title_input,
+                            self.listing_no_input,
                             
                             ft.Row([
                                 self.client_dropdown,
@@ -120,6 +122,7 @@ class AddPropertyView(ft.View):
         # 🚀 Model oluşturma (images alanı boş liste olarak gönderiliyor)
         new_prop = Property(
             title=str(self.title_input.value),
+            listing_no= str(self.listing_no_input.value),
             price=float(self.price_input.value or 0),
             owner_id=self.client_dropdown.value, # Müşteri ID'si
             images=[], # 📸 Şimdilik boş liste gönderiyoruz
