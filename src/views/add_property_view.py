@@ -57,8 +57,10 @@ class AddPropertyView(ft.View):
                             ft.Text("🏠 Yeni Mülk Ekle", size=28, weight=ft.FontWeight.BOLD, color="#1A237E"),
                             ft.Divider(height=10),
                             
-                            self.title_input,
-                            self.listing_no_input,
+                            ft.Row([
+                                self.title_input,
+                                self.listing_no_input,
+                            ], spacing=20),
                             
                             ft.Row([
                                 self.client_dropdown,
@@ -113,28 +115,42 @@ class AddPropertyView(ft.View):
             print(f"Yükleme hatası: {e}")
 
     async def save_property(self):
-        """İlanı kaydeder."""
-        # Validasyon: Başlık veya Müşteri boşsa uyarı ver
+        """İlanı kurallara göre doğrular ve kaydeder."""
+        
+        # 1. TEMEL BOŞLUK KONTROLÜ
         if not self.title_input.value or not self.client_dropdown.value:
-            UIHelpers.show_toast(self.main_page, "Lütfen ilan başlığını ve mülk sahibini seçin!", False)
+            UIHelpers.show_toast(self.main_page, "Lütfen gerekli alanları doldurun!", False)
             return
 
-        # 🚀 Model oluşturma (images alanı boş liste olarak gönderiliyor)
+        # 2. 10 HANE KONTROLÜ
+        listing_no = str(self.listing_no_input.value).strip()
+        if len(listing_no) != 10:
+            UIHelpers.show_toast(self.main_page, "İlan No tam 10 haneli olmalıdır!", False)
+            return
+
+        # 3. BENZERSİZLİK (UNIQUE) KONTROLÜ
+        # Servis üzerinden bu ilan numarasına sahip başka mülk var mı bakıyoruz
+        existing_properties = property_service.get_filtered("listing_no", listing_no)
+        if len(existing_properties) > 0:
+            UIHelpers.show_toast(self.main_page, "Bu İlan No zaten kullanımda! Lütfen farklı bir numara girin.", False)
+            return
+
+        # 4. KAYIT İŞLEMİ (Her şey yolundaysa)
         new_prop = Property(
+            listing_no=listing_no,
             title=str(self.title_input.value),
-            listing_no= str(self.listing_no_input.value),
             price=float(self.price_input.value or 0),
-            owner_id=self.client_dropdown.value, # Müşteri ID'si
-            images=[], # 📸 Şimdilik boş liste gönderiyoruz
-            property_type=PropertyType.DAIRE,
-            status=PropertyStatus.AKTIF,
+            owner_id=self.client_dropdown.value,
+            property_type=PropertyType[self.type_dropdown.value],
+            status=PropertyStatus[self.status_dropdown.value],
+            images=[],
             address=""
         )
         
         success = property_service.add(new_prop)
         
         if success:
-            UIHelpers.show_toast(self.main_page, "İlan başarıyla eklendi! ✨", True)
+            UIHelpers.show_toast(self.main_page, "İlan başarıyla portföye eklendi! ✨", True)
             self.main_page.go("/dashboard")
         else:
-            UIHelpers.show_toast(self.main_page, "Kayıt sırasında hata oluştu.", False)
+            UIHelpers.show_toast(self.main_page, "Kayıt sırasında bir hata oluştu.", False)
