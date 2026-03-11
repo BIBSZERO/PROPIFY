@@ -4,7 +4,7 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
@@ -48,6 +48,16 @@ class AddPropertyView(ft.View):
             border_color="#1A237E",
         )
 
+        # Oda Sayısı Dropdown
+        self.room_count_dropdown = ft.Dropdown(
+            label="Oda Sayısı",
+            options=[ft.dropdown.Option(key=str(r.name), text=str(r.value)) for r in RoomCount],
+            value="TWO_ONE",
+            width=250,
+            border_radius=12,
+            border_color="#1A237E",
+        )
+
         # --- 2. SAYFA TASARIMI ---
         self.controls = [
             ft.Row([
@@ -60,14 +70,16 @@ class AddPropertyView(ft.View):
                             ft.Divider(height=10),
                             
                             ft.Row([
-                                self.title_input,
                                 self.listing_no_input,
+                                self.title_input,
                             ], spacing=20),
 
                             ft.Row([
                                 self.m2_gross_input,
                                 self.m2_net_input
                             ], spacing=10),
+
+                            self.room_count_dropdown,
                             
                             ft.Row([
                                 self.client_dropdown,
@@ -149,6 +161,7 @@ class AddPropertyView(ft.View):
             price=float(self.price_input.value or 0),
             m2_gross=int(self.m2_gross_input.value or 0),
             m2_net=int(self.m2_net_input.value or 0),
+            room_count=RoomCount[self.room_count_dropdown.value],
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],

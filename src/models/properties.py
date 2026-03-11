@@ -14,6 +14,16 @@ class PropertyStatus(Enum):
     SATILDI = "Satıldı"
     KIRALANDI = "Kiralandı"
 
+class RoomCount(Enum):
+    STUDIO = "1+0"
+    ONE_ONE = "1+1"
+    TWO_ONE = "2+1"
+    THREE_ONE = "3+1"
+    FOUR_ONE = "4+1"
+    FOUR_TWO = "4+2"
+    FIVE_ONE = "5+1"
+    OTHER = "Diğer"
+
 @dataclass
 class Property:
     id: Optional[str] = None
@@ -24,6 +34,7 @@ class Property:
     price: float = 0.0
     m2_gross: int = 0
     m2_net: int = 0
+    room_count: RoomCount = RoomCount.TWO_ONE
     owner_id: Optional[str] = None
     address: Optional[str] = None
     # 📸 Görsel URL'lerini tutacak yeni alanımız
@@ -40,6 +51,7 @@ class Property:
             price=float(data.get("price", 0)),
             m2_gross=int(data.get("m2_gross", 0)),
             m2_net=int(data.get("m2_net", 0)),
+            room_count=(data.get("room_count", "2+1")),
             owner_id=data.get("owner_id"),
             address=data.get("address"),
             # 🕵️ Veritabanından gelen images listesini al, yoksa boş liste döndür
@@ -55,6 +67,7 @@ class Property:
             "price": self.price,
             "m2_gross": self.m2_gross,
             "m2_net": self.m2_net,
+            "room_count": self.room_count.value,
             "owner_id": self.owner_id,
             "address": self.address,
             # 🚀 Veritabanına gönderilecek görseller
