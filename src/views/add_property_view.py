@@ -19,6 +19,9 @@ class AddPropertyView(ft.View):
         
         self.m2_gross_input = CustomTextField(label="Brüt M2", icon=ft.Icons.SQUARE_FOOT, is_numeric=True)
         self.m2_net_input = CustomTextField(label="Net M2", icon=ft.Icons.SQUARE_FOOT, is_numeric=True)
+
+        self.floor_level_input = CustomTextField(label="Bulunduğu Kat", icon=ft.Icons.LAYERS)
+        self.total_floors_input = CustomTextField(label="Toplam Kat", icon=ft.Icons.BUSINESS, is_numeric=True)
         
         self.client_dropdown = ft.Dropdown(
             label="Mülk Sahibi",
@@ -97,9 +100,13 @@ class AddPropertyView(ft.View):
                                         ft.Row([self.listing_no_input, self.price_input], spacing=10)
                                     ]),
                                     section_card("Mülk Detayları", [
-                                        ft.Row([self.m2_gross_input, self.m2_net_input], spacing=10),
+                                        ft.Row([self.m2_gross_input, self.m2_net_input], spacing=20),
                                         ft.Row([self.room_count_dropdown, self.building_age_dropdown], spacing=10)
-                                    ])
+                                    ]),
+                                    section_card("Kat Bilgileri", [
+                                        ft.Row([self.floor_level_input, self.total_floors_input], spacing=20)
+                                    ]),
+
                                 ], expand=2, spacing=20),
 
                                 # Sağ Kolon: Durum ve Sahibi
@@ -161,6 +168,8 @@ class AddPropertyView(ft.View):
             price=float(self.price_input.value or 0),
             m2_gross=int(self.m2_gross_input.value or 0),
             m2_net=int(self.m2_net_input.value or 0),
+            floor_level=str(self.floor_level_input.value or ""),
+            total_floors=int(self.total_floors_input.value or 0),
             room_count=RoomCount[self.room_count_dropdown.value],
             building_age=BuildingAge[self.building_age_dropdown.value],
             owner_id=self.client_dropdown.value,

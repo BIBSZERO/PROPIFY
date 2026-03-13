@@ -42,6 +42,8 @@ class Property:
     price: float = 0.0
     m2_gross: int = 0
     m2_net: int = 0
+    floor_level: str = ""
+    total_floors: int = 0
     room_count: RoomCount = RoomCount.TWO_ONE
     building_age: BuildingAge = BuildingAge.ZERO
     owner_id: Optional[str] = None
@@ -64,6 +66,8 @@ class Property:
             price=float(data.get("price", 0)),
             m2_gross=int(data.get("m2_gross", 0)),
             m2_net=int(data.get("m2_net", 0)),
+            total_floors=int(data.get("total_floors") or 0),
+            floor_level=str(data.get("floor_level") or ""),
             # 🚀 GÜVENLİ DÖNÜŞÜM: Eğer veritabanında geçersiz bir string varsa varsayılana döner
             building_age=next((x for x in BuildingAge if x.value == b_age_val), BuildingAge.ZERO),
             room_count=next((x for x in RoomCount if x.value == r_count_val), RoomCount.TWO_ONE),
@@ -81,6 +85,8 @@ class Property:
             "price": self.price,
             "m2_gross": self.m2_gross,
             "m2_net": self.m2_net,
+            "floor_level": self.floor_level,
+            "total_floors": self.total_floors,
             "building_age": self.building_age.value,
             "room_count": self.room_count.value,
             "owner_id": self.owner_id,
