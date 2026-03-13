@@ -4,61 +4,69 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
     def __init__(self, page: ft.Page):
-        super().__init__(route="/add-property", bgcolor="#F4F7F9", padding=0)
+        super().__init__(route="/add-property", bgcolor="#F0F2F5", padding=0)
         self.main_page = page
 
         # --- 1. FORM BİLEŞENLERİ ---
-        self.title_input = CustomTextField(label="İlan Başlığı", icon=ft.Icons.TITLE)
-        self.listing_no_input = CustomTextField(label="İlan No", icon=ft.Icons.NUMBERS)
-        self.price_input = CustomTextField(label="Fiyat (TL)", icon=ft.Icons.ATTACH_MONEY)
-        self.price_input.input_filter = ft.NumbersOnlyInputFilter()
+        self.title_input = CustomTextField(label="İlan Başlığı", icon=ft.Icons.TITLE, expand=True)
+        self.listing_no_input = CustomTextField(label="İlan No (10 Hane)", icon=ft.Icons.NUMBERS)
+        self.price_input = CustomTextField(label="Fiyat (TL)", icon=ft.Icons.MONETIZATION_ON_OUTLINED, is_numeric=True)
+        
         self.m2_gross_input = CustomTextField(label="Brüt M2", icon=ft.Icons.SQUARE_FOOT, is_numeric=True)
         self.m2_net_input = CustomTextField(label="Net M2", icon=ft.Icons.SQUARE_FOOT, is_numeric=True)
         
-        # Müşteri Seçimi (Dropdown)
         self.client_dropdown = ft.Dropdown(
-            label="Mülk Sahibi (Müşteri)",
-            expand=True,
-            border_radius=12,
-            border_color="#1A237E",
-        )
+            label="Mülk Sahibi",
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white")
 
-        # Mülk Türü
         self.type_dropdown = ft.Dropdown(
             label="Mülk Türü",
             options=[ft.dropdown.Option(key=t.name, text=t.value) for t in PropertyType],
             value=PropertyType.DAIRE.name,
-            width=250,
-            border_radius=12,
-            border_color="#1A237E",
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
         )
 
-        # Mülk Durumu Dropdown
         self.status_dropdown = ft.Dropdown(
             label="İlan Durumu",
             options=[ft.dropdown.Option(key=s.name, text=s.value) for s in PropertyStatus],
-            value=PropertyStatus.AKTIF.name, # Varsayılan olarak Aktif seçili gelsin
-            width=250,
-            border_radius=12,
-            border_color="#1A237E",
+            value=PropertyStatus.AKTIF.name,
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
         )
 
-        # Oda Sayısı Dropdown
         self.room_count_dropdown = ft.Dropdown(
             label="Oda Sayısı",
             options=[ft.dropdown.Option(key=str(r.name), text=str(r.value)) for r in RoomCount],
             value="TWO_ONE",
-            width=250,
-            border_radius=12,
-            border_color="#1A237E",
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
+        )
+
+        self.building_age_dropdown = ft.Dropdown(
+            label="Bina Yaşı",
+            options=[ft.dropdown.Option(key=str(a.name), text=str(a.value)) for a in BuildingAge],
+            value="ZERO",
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
         )
 
         # --- 2. SAYFA TASARIMI ---
+        # Formu Bölümlere Ayıran Yardımcı Fonksiyon
+        def section_card(title: str, controls: list):
+            return ft.Container(
+                content=ft.Column([
+                    ft.Text(title, size=18, weight=ft.FontWeight.BOLD, color="#1A237E"),
+                    ft.Divider(height=1, color="#EEEEEE"),
+                    ft.Column(controls, spacing=15)
+                ], spacing=10),
+                padding=20,
+                bgcolor="white",
+                border_radius=12,
+                shadow=ft.BoxShadow(blur_radius=10, color=ft.Colors.with_opacity(0.05, "black"))
+            )
+
         self.controls = [
             ft.Row([
                 SideBar(self.main_page),
@@ -66,63 +74,62 @@ class AddPropertyView(ft.View):
                     TopBar(self.main_page),
                     ft.Container(
                         content=ft.Column([
-                            ft.Text("🏠 Yeni Mülk Ekle", size=28, weight=ft.FontWeight.BOLD, color="#1A237E"),
-                            ft.Divider(height=10),
-                            
+                            # Üst Başlık ve Kaydet Butonu
                             ft.Row([
-                                self.listing_no_input,
-                                self.title_input,
-                            ], spacing=20),
+                                ft.Text("🏠 Yeni Mülk Ekle", size=28, weight=ft.FontWeight.BOLD, color="#1A237E"),
+                                ft.ElevatedButton(
+                                    "Portföye Kaydet",
+                                    icon=ft.Icons.SAVE_ROUNDED,
+                                    bgcolor="#1A237E", color="white",
+                                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
+                                    on_click=lambda _: self.main_page.run_task(self.save_property)
+                                )
+                            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                            
+                            ft.Divider(height=20, color="transparent"),
 
+                            # Ana Form Düzeni (Grid gibi)
                             ft.Row([
-                                self.m2_gross_input,
-                                self.m2_net_input
-                            ], spacing=10),
+                                # Sol Kolon: Temel ve Teknik Bilgiler
+                                ft.Column([
+                                    section_card("Temel Bilgiler", [
+                                        self.title_input,
+                                        ft.Row([self.listing_no_input, self.price_input], spacing=10)
+                                    ]),
+                                    section_card("Mülk Detayları", [
+                                        ft.Row([self.m2_gross_input, self.m2_net_input], spacing=10),
+                                        ft.Row([self.room_count_dropdown, self.building_age_dropdown], spacing=10)
+                                    ])
+                                ], expand=2, spacing=20),
 
-                            self.room_count_dropdown,
-                            
-                            ft.Row([
-                                self.client_dropdown,
-                            ft.IconButton(
-                                icon=ft.Icons.ADD_CIRCLE_OUTLINE,
-                                icon_color="#1A237E",
-                                tooltip="Yeni Müşteri Ekle",
-                                on_click=lambda _: self.main_page.go("/add-client")
-                            ),
-                            ], spacing=10),
-                            
-                            # Tür ve Durum Seçimi Yan Yana
-                            ft.Row([
-                                self.type_dropdown,
-                                self.status_dropdown,
-                            ], spacing=20),
-                            
-                            # Fiyat girişi (Uploader kaldırıldı, tek başına sütun olarak duruyor)
-                            ft.Row([
-                                ft.Column([self.price_input], width=300),
-                            ], alignment=ft.MainAxisAlignment.START),
-                            
-                            ft.Divider(height=20),
-                            
-                            ft.ElevatedButton(
-                                "Portföye Kaydet",
-                                icon=ft.Icons.SAVE,
-                                bgcolor="#1A237E", color="white",
-                                width=250, height=50,
-                                on_click=lambda _: self.main_page.run_task(self.save_property)
-                            )
-                        ], scroll=ft.ScrollMode.ADAPTIVE, spacing=15),
-                        padding=40, expand=True
+                                # Sağ Kolon: Durum ve Sahibi
+                                ft.Column([
+                                    section_card("Kategorizasyon", [
+                                        self.type_dropdown,
+                                        self.status_dropdown
+                                    ]),
+                                    section_card("İletişim", [
+                                        ft.Row([
+                                            self.client_dropdown,
+                                            ft.IconButton(
+                                                icon=ft.Icons.ADD_CIRCLE_OUTLINE,
+                                                icon_color="#1A237E",
+                                                on_click=lambda _: self.main_page.go("/add-client")
+                                            ),
+                                        ], spacing=5)
+                                    ])
+                                ], expand=1, spacing=20)
+                            ], vertical_alignment=ft.CrossAxisAlignment.START, spacing=20)
+
+                        ], scroll=ft.ScrollMode.HIDDEN, spacing=0),
+                        padding=30, expand=True
                     )
                 ], expand=True)
             ], expand=True)
         ]
-        
-        # Verileri yükle
         self.load_initial_data()
 
     def load_initial_data(self):
-        """Müşteri listesini yeniler."""
         try:
             contacts = contact_service.get_all()
             self.client_dropdown.options = [
@@ -134,27 +141,20 @@ class AddPropertyView(ft.View):
             print(f"Yükleme hatası: {e}")
 
     async def save_property(self):
-        """İlanı kurallara göre doğrular ve kaydeder."""
-        
-        # 1. TEMEL BOŞLUK KONTROLÜ
         if not self.title_input.value or not self.client_dropdown.value:
             UIHelpers.show_toast(self.main_page, "Lütfen gerekli alanları doldurun!", False)
             return
 
-        # 2. 10 HANE KONTROLÜ
         listing_no = str(self.listing_no_input.value).strip()
         if len(listing_no) != 10:
             UIHelpers.show_toast(self.main_page, "İlan No tam 10 haneli olmalıdır!", False)
             return
 
-        # 3. BENZERSİZLİK (UNIQUE) KONTROLÜ
-        # Servis üzerinden bu ilan numarasına sahip başka mülk var mı bakıyoruz
         existing_properties = property_service.get_filtered("listing_no", listing_no)
         if len(existing_properties) > 0:
-            UIHelpers.show_toast(self.main_page, "Bu İlan No zaten kullanımda! Lütfen farklı bir numara girin.", False)
+            UIHelpers.show_toast(self.main_page, "Bu İlan No zaten kullanımda!", False)
             return
 
-        # 4. KAYIT İŞLEMİ (Her şey yolundaysa)
         new_prop = Property(
             listing_no=listing_no,
             title=str(self.title_input.value),
@@ -162,6 +162,7 @@ class AddPropertyView(ft.View):
             m2_gross=int(self.m2_gross_input.value or 0),
             m2_net=int(self.m2_net_input.value or 0),
             room_count=RoomCount[self.room_count_dropdown.value],
+            building_age=BuildingAge[self.building_age_dropdown.value],
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],
@@ -169,9 +170,7 @@ class AddPropertyView(ft.View):
             address=""
         )
         
-        success = property_service.add(new_prop)
-        
-        if success:
+        if property_service.add(new_prop):
             UIHelpers.show_toast(self.main_page, "İlan başarıyla portföye eklendi! ✨", True)
             self.main_page.go("/dashboard")
         else:
