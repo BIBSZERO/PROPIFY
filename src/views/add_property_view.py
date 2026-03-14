@@ -4,7 +4,7 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
@@ -78,6 +78,13 @@ class AddPropertyView(ft.View):
             expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
         )
 
+        self.balcony_dropdown = ft.Dropdown(
+            label="Balkon",
+            options=[ft.dropdown.Option(key=b.name, text=b.value) for b in BalconyStatus],
+            value=BalconyStatus.YOK.name,
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -135,7 +142,8 @@ class AddPropertyView(ft.View):
                                     ]),
                                     section_card("Donanım Bilgileri", [
                                         self.heating_dropdown,
-                                        self.kitchen_type_dropdown
+                                        self.kitchen_type_dropdown,
+                                        self.balcony_dropdown
                                     ])
 
                                 ], expand=2, spacing=20),
@@ -205,6 +213,7 @@ class AddPropertyView(ft.View):
             building_age=BuildingAge[self.building_age_dropdown.value],
             heating=HeatingType[self.heating_dropdown.value],
             kitchen_type=KitchenType[self.kitchen_type_dropdown.value],
+            balcony=BalconyStatus[self.balcony_dropdown.value],
             bath_count=int(self.bath_count_input.value or 0),
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
