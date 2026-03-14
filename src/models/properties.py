@@ -55,6 +55,12 @@ class ElevatorStatus(Enum): # Asansör
     VAR = "Var"
     YOK = "Yok"
 
+class ParkingStatus(Enum):
+    YOK = "Yok"
+    KAPALI = "Kapalı"
+    ACIK = "Açık"
+    KAPALI_ACIK = "Kapalı + Açık"
+
 @dataclass
 class Property:
     id: Optional[str] = None
@@ -73,6 +79,7 @@ class Property:
     kitchen_type: KitchenType = KitchenType.KAPALI
     balcony: BalconyStatus = BalconyStatus.VAR
     elevator: ElevatorStatus = ElevatorStatus.YOK
+    parking: ParkingStatus = ParkingStatus.YOK
     bath_count: int = 0
     owner_id: Optional[str] = None
     address: Optional[str] = "" # 🚀 HATA DÜZELTME: Varsayılan değer ekledik (None yerine "")
@@ -87,6 +94,7 @@ class Property:
         kitchen_val = data.get("kitchen_type")
         balcony_val = data.get("balcony")
         elevator_val = data.get("elevator")
+        parking_val = data.get("parking")
 
         return Property(
             id=data.get("id"),
@@ -106,6 +114,7 @@ class Property:
             heating=next((h for h in HeatingType if h.value == heating_val), HeatingType.YOK),
             kitchen_type=next((k for k in KitchenType if k.value == kitchen_val), KitchenType.KAPALI),
             balcony=next((b for b in BalconyStatus if b.value == balcony_val), BalconyStatus.YOK),
+            parking=next((p for p in ParkingStatus if p.value == parking_val), ParkingStatus.YOK),
             elevator=next((e for e in ElevatorStatus if e.value == elevator_val), ElevatorStatus.YOK),
             bath_count=int(data.get("bath_count") or 0),
             owner_id=data.get("owner_id"),
@@ -128,6 +137,7 @@ class Property:
             "heating": self.heating.value,
             "kitchen_type": self.kitchen_type.value,
             "balcony": self.balcony.value,
+            "parking": self.parking.value,
             "elevator": self.elevator.value,
             "bath_count": self.bath_count,
             "room_count": self.room_count.value,

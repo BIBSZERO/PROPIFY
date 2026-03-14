@@ -4,7 +4,7 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus, ParkingStatus
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
@@ -92,6 +92,16 @@ class AddPropertyView(ft.View):
             expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
         )
 
+        self.parking_dropdown = ft.Dropdown(
+            label="Otopark Durumu",
+            options=[ft.dropdown.Option(key=p.name, text=p.value) for p in ParkingStatus],
+            value=ParkingStatus.YOK.name, # 🚀 Sayfa açıldığında "Yok" seçili gelir
+            expand=True, 
+            border_radius=10, 
+            border_color="#1A237E", 
+            bgcolor="white"
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -146,15 +156,17 @@ class AddPropertyView(ft.View):
                                     ]),
                                     section_card("Kat Bilgileri", [
                                         ft.Row([
-                                            self.floor_level_input, 
-                                            self.total_floors_input,
-                                            self.elevator_dropdown
-                                        ], spacing=20)
+                                            # Her birine expand=True vererek satırı 3 eşit parçaya böldük
+                                            ft.Container(content=self.floor_level_input, expand=True),
+                                            ft.Container(content=self.total_floors_input, expand=True),
+                                            ft.Container(content=self.elevator_dropdown, expand=True),
+                                        ], spacing=15) # Spacing'i biraz daraltarak yer kazandık
                                     ]),
                                     section_card("Donanım Bilgileri", [
                                         self.heating_dropdown,
                                         self.kitchen_type_dropdown,
-                                        self.balcony_dropdown
+                                        self.balcony_dropdown,
+                                        self.parking_dropdown
                                     ])
 
                                 ], expand=2, spacing=20),
@@ -227,6 +239,7 @@ class AddPropertyView(ft.View):
             balcony=BalconyStatus[self.balcony_dropdown.value],
             elevator=ElevatorStatus[self.elevator_dropdown.value],
             bath_count=int(self.bath_count_input.value or 0),
+            parking=ParkingStatus[self.parking_dropdown.value],
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],
