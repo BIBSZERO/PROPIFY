@@ -4,7 +4,7 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
@@ -85,6 +85,13 @@ class AddPropertyView(ft.View):
             expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
         )
 
+        self.elevator_dropdown = ft.Dropdown(
+            label="Asansör",
+            options=[ft.dropdown.Option(key=e.name, text=e.value) for e in ElevatorStatus],
+            value=ElevatorStatus.YOK.name,
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -138,7 +145,11 @@ class AddPropertyView(ft.View):
                                         ], spacing=10)
                                     ]),
                                     section_card("Kat Bilgileri", [
-                                        ft.Row([self.floor_level_input, self.total_floors_input], spacing=20)
+                                        ft.Row([
+                                            self.floor_level_input, 
+                                            self.total_floors_input,
+                                            self.elevator_dropdown
+                                        ], spacing=20)
                                     ]),
                                     section_card("Donanım Bilgileri", [
                                         self.heating_dropdown,
@@ -214,6 +225,7 @@ class AddPropertyView(ft.View):
             heating=HeatingType[self.heating_dropdown.value],
             kitchen_type=KitchenType[self.kitchen_type_dropdown.value],
             balcony=BalconyStatus[self.balcony_dropdown.value],
+            elevator=ElevatorStatus[self.elevator_dropdown.value],
             bath_count=int(self.bath_count_input.value or 0),
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
