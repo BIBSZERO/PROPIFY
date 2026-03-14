@@ -4,7 +4,7 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus, ParkingStatus
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus, ParkingStatus, FurnishedStatus
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
@@ -102,6 +102,13 @@ class AddPropertyView(ft.View):
             bgcolor="white"
         )
 
+        self.furnished_dropdown = ft.Dropdown(
+            label="Eşya Durumu",
+            options=[ft.dropdown.Option(key=f.name, text=f.value) for f in FurnishedStatus],
+            value=FurnishedStatus.ESYASIZ.name,
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -144,10 +151,10 @@ class AddPropertyView(ft.View):
                                 ft.Column([
                                     section_card("Temel Bilgiler", [
                                         self.title_input,
-                                        ft.Row([self.listing_no_input, self.price_input], spacing=10)
+                                        ft.Row([self.listing_no_input, self.price_input], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                                     ]),
                                     section_card("Mülk Detayları", [
-                                        ft.Row([self.m2_gross_input, self.m2_net_input], spacing=20),
+                                        ft.Row([self.m2_gross_input, self.m2_net_input], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                                         ft.Row([
                                             self.room_count_dropdown, 
                                             self.building_age_dropdown, 
@@ -163,11 +170,16 @@ class AddPropertyView(ft.View):
                                         ], spacing=15) # Spacing'i biraz daraltarak yer kazandık
                                     ]),
                                     section_card("Donanım Bilgileri", [
-                                        self.heating_dropdown,
-                                        self.kitchen_type_dropdown,
-                                        self.balcony_dropdown,
-                                        self.parking_dropdown
-                                    ])
+                                        ft.Row([
+                                            ft.Container(content=self.heating_dropdown, expand=True),
+                                            ft.Container(content=self.kitchen_type_dropdown, expand=True),
+                                        ], spacing=10),
+                                        ft.Row([
+                                            ft.Container(content=self.balcony_dropdown, expand=True),
+                                            ft.Container(content=self.parking_dropdown, expand=True),
+                                            ft.Container(content=self.furnished_dropdown, expand=True), # 🚀 Eşyalı durumu eklendi
+                                        ], spacing=10)
+                                    ]),
 
                                 ], expand=2, spacing=20),
 
@@ -240,6 +252,7 @@ class AddPropertyView(ft.View):
             elevator=ElevatorStatus[self.elevator_dropdown.value],
             bath_count=int(self.bath_count_input.value or 0),
             parking=ParkingStatus[self.parking_dropdown.value],
+            furnished=FurnishedStatus[self.furnished_dropdown.value],
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],
