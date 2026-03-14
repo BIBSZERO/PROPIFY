@@ -65,6 +65,12 @@ class AddPropertyView(ft.View):
             bgcolor="white"
         )
 
+        self.bath_count_input = CustomTextField(
+            label="Banyo Sayısı", 
+            icon=ft.Icons.BATHTUB_OUTLINED, 
+            is_numeric=True
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -111,7 +117,11 @@ class AddPropertyView(ft.View):
                                     ]),
                                     section_card("Mülk Detayları", [
                                         ft.Row([self.m2_gross_input, self.m2_net_input], spacing=20),
-                                        ft.Row([self.room_count_dropdown, self.building_age_dropdown], spacing=10)
+                                        ft.Row([
+                                            self.room_count_dropdown, 
+                                            self.building_age_dropdown, 
+                                            self.bath_count_input
+                                        ], spacing=10)
                                     ]),
                                     section_card("Kat Bilgileri", [
                                         ft.Row([self.floor_level_input, self.total_floors_input], spacing=20)
@@ -186,6 +196,7 @@ class AddPropertyView(ft.View):
             room_count=RoomCount[self.room_count_dropdown.value],
             building_age=BuildingAge[self.building_age_dropdown.value],
             heating=HeatingType[self.heating_dropdown.value],
+            bath_count=int(self.bath_count_input.value or 0),
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],

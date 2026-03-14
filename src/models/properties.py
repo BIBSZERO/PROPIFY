@@ -58,6 +58,7 @@ class Property:
     room_count: RoomCount = RoomCount.TWO_ONE
     building_age: BuildingAge = BuildingAge.ZERO
     heating: HeatingType = HeatingType.YOK
+    bath_count: int = 0
     owner_id: Optional[str] = None
     address: Optional[str] = "" # 🚀 HATA DÜZELTME: Varsayılan değer ekledik (None yerine "")
     images: List[str] = field(default_factory=list)
@@ -85,6 +86,7 @@ class Property:
             building_age=next((x for x in BuildingAge if x.value == b_age_val), BuildingAge.ZERO),
             room_count=next((x for x in RoomCount if x.value == r_count_val), RoomCount.TWO_ONE),
             heating=next((h for h in HeatingType if h.value == heating_val), HeatingType.YOK),
+            bath_count=int(data.get("bath_count") or 0),
             owner_id=data.get("owner_id"),
             address=data.get("address", ""),
             images=data.get("images", [])
@@ -103,6 +105,7 @@ class Property:
             "total_floors": self.total_floors,
             "building_age": self.building_age.value,
             "heating": self.heating.value,
+            "bath_count": self.bath_count,
             "room_count": self.room_count.value,
             "owner_id": self.owner_id,
             "address": self.address,
