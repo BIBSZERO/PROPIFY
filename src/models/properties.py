@@ -32,6 +32,17 @@ class BuildingAge(Enum):
     SIXTEEN_TWENTY = "16-20 Yıl"
     OVER_TWENTY = "21 ve Üzeri"
 
+class HeatingType(Enum):
+    YOK = "Yok"
+    SOBA = "Soba"
+    DOGALGAZ_SOBA = "Doğalgaz Sobası"
+    KOMBI_DOGALGAZ = "Kombi (Doğalgaz)"
+    MERKEZI = "Merkezi Sistem"
+    MERKEZI_PAY = "Merkezi (Isı Pay Ölçer)"
+    YERDEN_ISITMA = "Yerden Isıtma"
+    KLIMA = "Klima"
+    ISI_POMPASI = "Isı Pompası"
+
 @dataclass
 class Property:
     id: Optional[str] = None
@@ -46,6 +57,7 @@ class Property:
     total_floors: int = 0
     room_count: RoomCount = RoomCount.TWO_ONE
     building_age: BuildingAge = BuildingAge.ZERO
+    heating: HeatingType = HeatingType.YOK
     owner_id: Optional[str] = None
     address: Optional[str] = "" # 🚀 HATA DÜZELTME: Varsayılan değer ekledik (None yerine "")
     images: List[str] = field(default_factory=list)
@@ -55,6 +67,7 @@ class Property:
         # Enum dönüşümlerinde hata almamak için .get() ile gelen değeri kontrol ediyoruz
         b_age_val = data.get("building_age")
         r_count_val = data.get("room_count")
+        heating_val = data.get("heating")
 
         return Property(
             id=data.get("id"),
@@ -71,6 +84,7 @@ class Property:
             # 🚀 GÜVENLİ DÖNÜŞÜM: Eğer veritabanında geçersiz bir string varsa varsayılana döner
             building_age=next((x for x in BuildingAge if x.value == b_age_val), BuildingAge.ZERO),
             room_count=next((x for x in RoomCount if x.value == r_count_val), RoomCount.TWO_ONE),
+            heating=next((h for h in HeatingType if h.value == heating_val), HeatingType.YOK),
             owner_id=data.get("owner_id"),
             address=data.get("address", ""),
             images=data.get("images", [])
@@ -88,6 +102,7 @@ class Property:
             "floor_level": self.floor_level,
             "total_floors": self.total_floors,
             "building_age": self.building_age.value,
+            "heating": self.heating.value,
             "room_count": self.room_count.value,
             "owner_id": self.owner_id,
             "address": self.address,

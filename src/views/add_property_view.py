@@ -4,7 +4,7 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
@@ -53,6 +53,16 @@ class AddPropertyView(ft.View):
             options=[ft.dropdown.Option(key=str(a.name), text=str(a.value)) for a in BuildingAge],
             value="ZERO",
             expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
+        )
+
+        self.heating_dropdown = ft.Dropdown(
+            label="Isıtma Sistemi",
+            options=[ft.dropdown.Option(key=h.name, text=h.value) for h in HeatingType],
+            value=HeatingType.KOMBI_DOGALGAZ.name,
+            expand=True,
+            border_radius=10,
+            border_color="#1A237E", 
+            bgcolor="white"
         )
 
         # --- 2. SAYFA TASARIMI ---
@@ -106,6 +116,9 @@ class AddPropertyView(ft.View):
                                     section_card("Kat Bilgileri", [
                                         ft.Row([self.floor_level_input, self.total_floors_input], spacing=20)
                                     ]),
+                                    section_card("Donanım Bilgileri", [
+                                        self.heating_dropdown
+                                    ])
 
                                 ], expand=2, spacing=20),
 
@@ -172,6 +185,7 @@ class AddPropertyView(ft.View):
             total_floors=int(self.total_floors_input.value or 0),
             room_count=RoomCount[self.room_count_dropdown.value],
             building_age=BuildingAge[self.building_age_dropdown.value],
+            heating=HeatingType[self.heating_dropdown.value],
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],
