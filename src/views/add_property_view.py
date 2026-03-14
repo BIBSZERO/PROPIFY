@@ -4,7 +4,7 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus, ParkingStatus, FurnishedStatus
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus, ParkingStatus, FurnishedStatus, OccupationStatus
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
@@ -109,6 +109,13 @@ class AddPropertyView(ft.View):
             expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
         )
 
+        self.occupation_dropdown = ft.Dropdown(
+            label="Kullanım Durumu",
+            options=[ft.dropdown.Option(key=o.name, text=o.value) for o in OccupationStatus],
+            value=OccupationStatus.BOS.name,
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -187,7 +194,8 @@ class AddPropertyView(ft.View):
                                 ft.Column([
                                     section_card("Kategorizasyon", [
                                         self.type_dropdown,
-                                        self.status_dropdown
+                                        self.status_dropdown,
+                                        self.occupation_dropdown # 🚀 Buraya eklendi
                                     ]),
                                     section_card("İletişim", [
                                         ft.Row([
@@ -253,6 +261,7 @@ class AddPropertyView(ft.View):
             bath_count=int(self.bath_count_input.value or 0),
             parking=ParkingStatus[self.parking_dropdown.value],
             furnished=FurnishedStatus[self.furnished_dropdown.value],
+            occupation=OccupationStatus[self.occupation_dropdown.value],
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],
