@@ -4,7 +4,7 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus, ParkingStatus, FurnishedStatus, OccupationStatus
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus, ParkingStatus, FurnishedStatus, OccupationStatus, InSiteStatus 
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
@@ -116,6 +116,13 @@ class AddPropertyView(ft.View):
             expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
         )
 
+        self.in_site_dropdown = ft.Dropdown(
+            label="Site İçerisinde",
+            options=[ft.dropdown.Option(key=s.name, text=s.value) for s in InSiteStatus],
+            value=InSiteStatus.HAYIR.name,
+            expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -193,9 +200,14 @@ class AddPropertyView(ft.View):
                                 # Sağ Kolon: Durum ve Sahibi
                                 ft.Column([
                                     section_card("Kategorizasyon", [
-                                        self.type_dropdown,
-                                        self.status_dropdown,
-                                        self.occupation_dropdown # 🚀 Buraya eklendi
+                                        ft.Row([
+                                            ft.Container(content=self.type_dropdown, expand=True),
+                                            ft.Container(content=self.status_dropdown, expand=True),
+                                        ], spacing=10),
+                                        ft.Row([
+                                            ft.Container(content=self.occupation_dropdown, expand=True),
+                                            ft.Container(content=self.in_site_dropdown, expand=True), # 🚀 Buraya eklendi
+                                        ], spacing=10)
                                     ]),
                                     section_card("İletişim", [
                                         ft.Row([
@@ -262,6 +274,7 @@ class AddPropertyView(ft.View):
             parking=ParkingStatus[self.parking_dropdown.value],
             furnished=FurnishedStatus[self.furnished_dropdown.value],
             occupation=OccupationStatus[self.occupation_dropdown.value],
+            in_site=InSiteStatus[self.in_site_dropdown.value],
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],
