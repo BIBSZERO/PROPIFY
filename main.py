@@ -7,6 +7,7 @@ from src.views.dashboard_view import DashboardView
 from src.views.password_reset_view import PasswordResetView
 from src.views.add_property_view import AddPropertyView
 from src.views.add_client_view import AddClientView
+from src.views.portfolio_view import PortfolioView
 
 def main(page: ft.Page):
     page.title = "PROPIFY"
@@ -54,6 +55,9 @@ def main(page: ft.Page):
             
         elif current_route == "/dashboard":
             page.views.append(DashboardView(page))
+        
+        elif page.route == "/portfolio":
+            page.views.append(PortfolioView(page))
 
         elif current_route == "/add-client":
             page.views.append(AddClientView(page))

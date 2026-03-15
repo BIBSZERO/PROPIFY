@@ -13,7 +13,7 @@ class SideBar(ft.Container):
             ft.Text(" PROPIFY", size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
             ft.Container(height=20),
             self.nav_item(ft.Icons.DASHBOARD, "Genel Bakış", True, on_click=lambda _: self.page.go("/dashboard")),
-            self.nav_item(ft.Icons.HOME_WORK, "Portföyler", False),
+            self.nav_item(ft.Icons.HOME_WORK, "Portföyler", True, on_click=lambda _: self.page.go("/portfolio")),
             self.nav_item(ft.Icons.PERSON, "Mülk Sahipleri", False),
             ft.Container(expand=True),
             self.nav_item(ft.Icons.ADD_CIRCLE, "Yeni Mülk Sahibi Ekle", True, on_click=lambda _: self.page.go("/add-client")),
