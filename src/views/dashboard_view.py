@@ -47,16 +47,22 @@ class DashboardView(ft.View):
                 content=ft.Column([
                     ft.Row([
                         ft.Text("Son İlanlar", size=22, weight=ft.FontWeight.BOLD, color="#1A237E"),
-                        ft.TextButton("Tümünü Gör", icon=ft.Icons.ARROW_FORWARD),
+                        ft.TextButton("Tümünü Gör", icon=ft.Icons.ARROW_FORWARD, on_click=lambda _: self.main_page.go("/all-properties")),
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ft.Divider(height=10, color="transparent"),
 
-                    # Eğer veri varsa girdi göster, yoksa boş durum göster
+                    # Sadece son 4 ilanı (en yeni eklenenleri) gösteren Row
                     ft.Row([
                         ft.Column([
-                            self.property_grid if self.properties else self.build_empty_state()
+                            ft.Row(
+                                wrap=True,
+                                spacing=25,
+                                run_spacing=25,
+                                # properties listesinin son 4 elemanını ters çevirerek alır
+                                controls=[PropertyCard(p) for p in self.properties[:-5:-1]] if self.properties else [self.build_empty_state()]
+                            )
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True)
-                    ],alignment=ft.MainAxisAlignment.CENTER),     
+                    ], alignment=ft.MainAxisAlignment.CENTER),     
                 ]),
                 padding=20,
                 expand=True
