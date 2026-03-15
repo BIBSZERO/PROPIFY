@@ -12,7 +12,7 @@ class SideBar(ft.Container):
         self.content = ft.Column([
             ft.Text(" PROPIFY", size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
             ft.Container(height=20),
-            self.nav_item(ft.Icons.DASHBOARD, "Genel Bakış", True),
+            self.nav_item(ft.Icons.DASHBOARD, "Genel Bakış", True, on_click=lambda _: self.page.go("/dashboard")),
             self.nav_item(ft.Icons.HOME_WORK, "Portföyler", False),
             self.nav_item(ft.Icons.PERSON, "Mülk Sahipleri", False),
             ft.Container(expand=True),
