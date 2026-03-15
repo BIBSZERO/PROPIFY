@@ -47,11 +47,11 @@ class KitchenType(Enum):
     KAPALI = "Kapalı Mutfak"
     AMERIKAN = "Amerikan Mutfak"
 
-class BalconyStatus(Enum): # Balkon
+class BalconyStatus(Enum):
     VAR = "Var"
     YOK = "Yok"
 
-class ElevatorStatus(Enum): # Asansör
+class ElevatorStatus(Enum):
     VAR = "Var"
     YOK = "Yok"
 
@@ -76,6 +76,7 @@ class InSiteStatus(Enum):
 
 @dataclass
 class Property:
+    # 🛠️ Zorunlu olmayan alanlar için varsayılan değerler ve doğru Type Hinting
     id: Optional[str] = None
     listing_no: str = ""
     title: str = ""
@@ -96,54 +97,48 @@ class Property:
     furnished: FurnishedStatus = FurnishedStatus.ESYASIZ
     occupation: OccupationStatus = OccupationStatus.BOS
     in_site: InSiteStatus = InSiteStatus.HAYIR
+    site_name: Optional[str] = "" # 🚀 Düzelttik!
     bath_count: int = 0
-    owner_id: Optional[str] = None
-    address: Optional[str] = "" # 🚀 HATA DÜZELTME: Varsayılan değer ekledik (None yerine "")
+    owner_id: Optional[str] = None # 🚀 Düzelttik!
+    address: Optional[str] = ""
     images: List[str] = field(default_factory=list)
 
     @staticmethod
     def from_dict(data: dict):
-        # Enum dönüşümlerinde hata almamak için .get() ile gelen değeri kontrol ediyoruz
-        b_age_val = data.get("building_age")
-        r_count_val = data.get("room_count")
-        heating_val = data.get("heating")
-        kitchen_val = data.get("kitchen_type")
-        balcony_val = data.get("balcony")
-        elevator_val = data.get("elevator")
-        parking_val = data.get("parking")
-        furnished_val = data.get("furnished")
-        occ_val = data.get("occupation")
-        in_site_val = data.get("in_site")
+        # Enum değerlerini güvenli bir şekilde çekiyoruz
+        def get_enum_value(enum_class, key, default):
+            val = data.get(key)
+            return next((x for x in enum_class if x.value == val), default)
 
         return Property(
             id=data.get("id"),
             listing_no=data.get("listing_no", ""),
             title=data.get("title", ""),
-            # Supabase'deki anahtar isimlerinin to_dict ile uyumlu olduğundan emin ol (type vs property_type)
-            property_type=PropertyType(data.get("type", "Daire")),
-            status=PropertyStatus(data.get("status", "Aktif")),
-            price=float(data.get("price", 0)),
-            m2_gross=int(data.get("m2_gross", 0)),
-            m2_net=int(data.get("m2_net", 0)),
-            total_floors=int(data.get("total_floors") or 0),
+            # Supabase'de 'type' olarak tutuluyorsa:
+            property_type=get_enum_value(PropertyType, "type", PropertyType.DAIRE),
+            status=get_enum_value(PropertyStatus, "status", PropertyStatus.AKTIF),
+            price=float(data.get("price") or 0),
+            m2_gross=int(data.get("m2_gross") or 0),
+            m2_net=int(data.get("m2_net") or 0),
             floor_level=str(data.get("floor_level") or ""),
-            # 🚀 GÜVENLİ DÖNÜŞÜM: Eğer veritabanında geçersiz bir string varsa varsayılana döner
-            building_age=next((x for x in BuildingAge if x.value == b_age_val), BuildingAge.ZERO),
-            room_count=next((x for x in RoomCount if x.value == r_count_val), RoomCount.TWO_ONE),
-            heating=next((h for h in HeatingType if h.value == heating_val), HeatingType.YOK),
-            kitchen_type=next((k for k in KitchenType if k.value == kitchen_val), KitchenType.KAPALI),
-            balcony=next((b for b in BalconyStatus if b.value == balcony_val), BalconyStatus.YOK),
-            parking=next((p for p in ParkingStatus if p.value == parking_val), ParkingStatus.YOK),
-            furnished=next((f for f in FurnishedStatus if f.value == furnished_val), FurnishedStatus.ESYASIZ),
-            occupation=next((o for o in OccupationStatus if o.value == occ_val), OccupationStatus.BOS),
-            in_site=next((s for s in InSiteStatus if s.value == in_site_val), InSiteStatus.HAYIR),
-            elevator=next((e for e in ElevatorStatus if e.value == elevator_val), ElevatorStatus.YOK),
+            total_floors=int(data.get("total_floors") or 0),
+            room_count=get_enum_value(RoomCount, "room_count", RoomCount.TWO_ONE),
+            building_age=get_enum_value(BuildingAge, "building_age", BuildingAge.ZERO),
+            heating=get_enum_value(HeatingType, "heating", HeatingType.YOK),
+            kitchen_type=get_enum_value(KitchenType, "kitchen_type", KitchenType.KAPALI),
+            balcony=get_enum_value(BalconyStatus, "balcony", BalconyStatus.VAR),
+            elevator=get_enum_value(ElevatorStatus, "elevator", ElevatorStatus.YOK),
+            parking=get_enum_value(ParkingStatus, "parking", ParkingStatus.YOK),
+            furnished=get_enum_value(FurnishedStatus, "furnished", FurnishedStatus.ESYASIZ),
+            occupation=get_enum_value(OccupationStatus, "occupation", OccupationStatus.BOS),
+            in_site=get_enum_value(InSiteStatus, "in_site", InSiteStatus.HAYIR),
+            site_name=data.get("site_name", ""),
             bath_count=int(data.get("bath_count") or 0),
             owner_id=data.get("owner_id"),
             address=data.get("address", ""),
             images=data.get("images", [])
         )
-    
+
     def to_dict(self):
         return {
             "listing_no": self.listing_no,
@@ -155,17 +150,18 @@ class Property:
             "m2_net": self.m2_net,
             "floor_level": self.floor_level,
             "total_floors": self.total_floors,
+            "room_count": self.room_count.value,
             "building_age": self.building_age.value,
             "heating": self.heating.value,
             "kitchen_type": self.kitchen_type.value,
             "balcony": self.balcony.value,
+            "elevator": self.elevator.value,
             "parking": self.parking.value,
             "furnished": self.furnished.value,
             "occupation": self.occupation.value,
             "in_site": self.in_site.value,
-            "elevator": self.elevator.value,
+            "site_name": self.site_name,
             "bath_count": self.bath_count,
-            "room_count": self.room_count.value,
             "owner_id": self.owner_id,
             "address": self.address,
             "images": self.images

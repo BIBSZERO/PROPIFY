@@ -123,6 +123,12 @@ class AddPropertyView(ft.View):
             expand=True, border_radius=10, border_color="#1A237E", bgcolor="white"
         )
 
+        self.site_name_input = CustomTextField(
+            label="Site / Apartman Adı", 
+            icon=ft.Icons.BUSINESS_OUTLINED,
+            expand=True # 👈 Ekrana sığması için yine expand kullanıyoruz
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -192,6 +198,12 @@ class AddPropertyView(ft.View):
                                             ft.Container(content=self.balcony_dropdown, expand=True),
                                             ft.Container(content=self.parking_dropdown, expand=True),
                                             ft.Container(content=self.furnished_dropdown, expand=True), # 🚀 Eşyalı durumu eklendi
+                                        ], spacing=10)
+                                    ]),
+                                    section_card("Konum ve Site Bilgisi", [
+                                        ft.Row([
+                                            ft.Container(content=self.in_site_dropdown, expand=1),
+                                            ft.Container(content=self.site_name_input, expand=2), # İsim alanı daha geniş kalsın
                                         ], spacing=10)
                                     ]),
 
@@ -275,6 +287,7 @@ class AddPropertyView(ft.View):
             furnished=FurnishedStatus[self.furnished_dropdown.value],
             occupation=OccupationStatus[self.occupation_dropdown.value],
             in_site=InSiteStatus[self.in_site_dropdown.value],
+            site_name=str(self.site_name_input.value or ""),
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],
