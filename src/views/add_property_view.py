@@ -4,7 +4,7 @@ from src.components.top_bar import TopBar
 from src.components.custom_text_field import CustomTextField
 from src.services.property_service import property_service
 from src.services.contact_service import contact_service
-from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus, ParkingStatus, FurnishedStatus, OccupationStatus, InSiteStatus 
+from src.models.properties import Property, PropertyType, PropertyStatus, RoomCount, BuildingAge, HeatingType, KitchenType, BalconyStatus, ElevatorStatus, ParkingStatus, FurnishedStatus, OccupationStatus, InSiteStatus, TitleDeedStatus 
 from src.utils.ui_helpers import UIHelpers
 
 class AddPropertyView(ft.View):
@@ -143,6 +143,16 @@ class AddPropertyView(ft.View):
             expand=True
         )
 
+        self.title_deed_dropdown = ft.Dropdown(
+            label="Tapu Durumu",
+            options=[ft.dropdown.Option(key=t.name, text=t.value) for t in TitleDeedStatus],
+            value=TitleDeedStatus.KAT_MULKIYETI.name,
+            expand=True, 
+            border_radius=10, 
+            border_color="#1A237E", 
+            bgcolor="white"
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -224,6 +234,11 @@ class AddPropertyView(ft.View):
                                         ft.Row([
                                             ft.Container(content=self.dues_input, expand=True),
                                               ft.Container(content=self.deposit_input, expand=True),
+                                        ], spacing=10),
+                                    ]),
+                                    section_card("Hukuki ve Teknik Bilgiler", [
+                                        ft.Row([
+                                            ft.Container(content=self.title_deed_dropdown, expand=1),
                                         ], spacing=10),
                                     ]),
 
@@ -312,6 +327,8 @@ class AddPropertyView(ft.View):
             in_site=InSiteStatus[self.in_site_dropdown.value],
             site_name=str(self.site_name_input.value or ""),
             dues=float(self.dues_input.value or 0),
+            deposit=float(self.deposit_input.value or 0),
+            title_deed=TitleDeedStatus(self.title_deed_dropdown.value),
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],

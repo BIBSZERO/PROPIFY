@@ -74,6 +74,14 @@ class InSiteStatus(Enum):
     EVET = "Evet"
     HAYIR = "Hayır"
 
+class TitleDeedStatus(Enum):
+    KAT_MULKIYETI = "Kat Mülkiyeti"
+    KAT_IRTIFAKI = "Kat İrtifakı"
+    HISSELI_TAPU = "Hisseli Tapu"
+    MUSTAKIL_PARSEL = "Müstakil Parsel"
+    ARSA_TAPUSU = "Arsa Tapusu"
+    BILINMIYOR = "Bilinmiyor"
+
 @dataclass
 class Property:
     # 🛠️ Zorunlu olmayan alanlar için varsayılan değerler ve doğru Type Hinting
@@ -100,6 +108,7 @@ class Property:
     site_name: Optional[str] = "" # 🚀 Düzelttik!
     dues: float = 0.0
     deposit: float = 0.0
+    title_deed: TitleDeedStatus = TitleDeedStatus.KAT_MULKIYETI
     bath_count: int = 0
     owner_id: Optional[str] = None # 🚀 Düzelttik!
     address: Optional[str] = ""
@@ -137,6 +146,7 @@ class Property:
             site_name=data.get("site_name", ""),
             dues=float(data.get("dues") or 0.0),
             deposit=float(data.get("deposit") or 0.0),
+            title_deed=get_enum_value(TitleDeedStatus, "title_deed", TitleDeedStatus.KAT_MULKIYETI),
             bath_count=int(data.get("bath_count") or 0),
             owner_id=data.get("owner_id"),
             address=data.get("address", ""),
@@ -167,6 +177,7 @@ class Property:
             "site_name": self.site_name,
             "dues": self.dues,
             "deposit": self.deposit,
+            "title_deed": self.title_deed.value,
             "bath_count": self.bath_count,
             "owner_id": self.owner_id,
             "address": self.address,
