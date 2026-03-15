@@ -129,6 +129,20 @@ class AddPropertyView(ft.View):
             expand=True # 👈 Ekrana sığması için yine expand kullanıyoruz
         )
 
+        self.dues_input = CustomTextField(
+            label="Aidat Tutarı (TL)", 
+            icon=ft.Icons.MONETIZATION_ON_OUTLINED,
+            is_numeric=True,
+            expand=True
+        )
+
+        self.deposit_input = CustomTextField(
+            label="Depozito Tutarı (TL)", 
+            icon=ft.Icons.SECURITY_OUTLINED, # Güvenlik/Teminat ikonu
+            is_numeric=True,
+            expand=True
+        )
+
         # --- 2. SAYFA TASARIMI ---
         # Formu Bölümlere Ayıran Yardımcı Fonksiyon
         def section_card(title: str, controls: list):
@@ -171,10 +185,10 @@ class AddPropertyView(ft.View):
                                 ft.Column([
                                     section_card("Temel Bilgiler", [
                                         self.title_input,
-                                        ft.Row([self.listing_no_input, self.price_input], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+                                        ft.Row([self.listing_no_input, self.price_input], expand=True)
                                     ]),
                                     section_card("Mülk Detayları", [
-                                        ft.Row([self.m2_gross_input, self.m2_net_input], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                                        ft.Row([self.m2_gross_input, self.m2_net_input], expand=True),
                                         ft.Row([
                                             self.room_count_dropdown, 
                                             self.building_age_dropdown, 
@@ -205,6 +219,12 @@ class AddPropertyView(ft.View):
                                             ft.Container(content=self.in_site_dropdown, expand=1),
                                             ft.Container(content=self.site_name_input, expand=2), # İsim alanı daha geniş kalsın
                                         ], spacing=10)
+                                    ]),
+                                    section_card("Finansal Bilgiler", [
+                                        ft.Row([
+                                            ft.Container(content=self.dues_input, expand=True),
+                                              ft.Container(content=self.deposit_input, expand=True),
+                                        ], spacing=10),
                                     ]),
 
                                 ], expand=2, spacing=20),
@@ -246,7 +266,10 @@ class AddPropertyView(ft.View):
         try:
             contacts = contact_service.get_all()
             self.client_dropdown.options = [
-                ft.dropdown.Option(key=str(c.id), text=str(c.full_name)) 
+                ft.dropdown.Option(
+                    key=str(c.id), 
+                    text=f"{c.full_name} ({c.phone})"
+                ) 
                 for c in contacts
             ]
             self.main_page.update()
@@ -288,6 +311,7 @@ class AddPropertyView(ft.View):
             occupation=OccupationStatus[self.occupation_dropdown.value],
             in_site=InSiteStatus[self.in_site_dropdown.value],
             site_name=str(self.site_name_input.value or ""),
+            dues=float(self.dues_input.value or 0),
             owner_id=self.client_dropdown.value,
             property_type=PropertyType[self.type_dropdown.value],
             status=PropertyStatus[self.status_dropdown.value],

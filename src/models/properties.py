@@ -98,6 +98,8 @@ class Property:
     occupation: OccupationStatus = OccupationStatus.BOS
     in_site: InSiteStatus = InSiteStatus.HAYIR
     site_name: Optional[str] = "" # 🚀 Düzelttik!
+    dues: float = 0.0
+    deposit: float = 0.0
     bath_count: int = 0
     owner_id: Optional[str] = None # 🚀 Düzelttik!
     address: Optional[str] = ""
@@ -133,6 +135,8 @@ class Property:
             occupation=get_enum_value(OccupationStatus, "occupation", OccupationStatus.BOS),
             in_site=get_enum_value(InSiteStatus, "in_site", InSiteStatus.HAYIR),
             site_name=data.get("site_name", ""),
+            dues=float(data.get("dues") or 0.0),
+            deposit=float(data.get("deposit") or 0.0),
             bath_count=int(data.get("bath_count") or 0),
             owner_id=data.get("owner_id"),
             address=data.get("address", ""),
@@ -161,6 +165,8 @@ class Property:
             "occupation": self.occupation.value,
             "in_site": self.in_site.value,
             "site_name": self.site_name,
+            "dues": self.dues,
+            "deposit": self.deposit,
             "bath_count": self.bath_count,
             "owner_id": self.owner_id,
             "address": self.address,
