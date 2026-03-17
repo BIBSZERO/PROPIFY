@@ -47,7 +47,7 @@ class DashboardView(ft.View):
                 content=ft.Column([
                     ft.Row([
                         ft.Text("Son İlanlar", size=22, weight=ft.FontWeight.BOLD, color="#1A237E"),
-                        ft.TextButton("Tümünü Gör", icon=ft.Icons.ARROW_FORWARD, on_click=lambda _: self.main_page.go("/all-properties")),
+                        ft.TextButton("Tümünü Gör", icon=ft.Icons.ARROW_FORWARD, on_click=lambda _: self.main_page.go("/portfolio")),
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ft.Divider(height=10, color="transparent"),
 

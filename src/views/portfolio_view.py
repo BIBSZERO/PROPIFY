@@ -3,6 +3,7 @@ from src.components.sidebar import SideBar
 from src.components.top_bar import TopBar
 from src.components.property_list_item import PropertyListItem
 from src.services.property_service import PropertyService
+from src.views.property_detail_view import PropertyDetailView
 
 class PortfolioView(ft.View):
     def __init__(self, page: ft.Page):
@@ -121,8 +122,10 @@ class PortfolioView(ft.View):
 
     def on_property_click(self, property_data):
         """İlana tıklandığında detay sayfasına yönlendirir"""
-        print(f"Detaylara gidiliyor: {property_data.title}")
-        # self.main_page.go(f"/property-detail/{property_data.id}")
+        self.main_page.views.append(
+            PropertyDetailView(self.main_page, property_data)
+        )
+        self.main_page.update()
 
     def build_empty_state(self):
         """Sonuç bulunamadığında gösterilecek görsel alan"""
