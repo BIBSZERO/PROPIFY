@@ -142,6 +142,14 @@ class PropertyDetailView(ft.View):
             UIHelpers.show_toast(self.main_page, f"Hata: {err}", is_success=False)
 
     def handle_edit(self, e):
-        """Düzenleme sayfasına yönlendirir."""
-        UIHelpers.show_toast(self.main_page, "Düzenleme ekranına geçiliyor...", is_success=True)
-        # TODO: self.main_page.go("/add-property", edit_data=self.p)
+        """
+        Düzenleme butonuna basıldığında:
+        1. Mevcut mülk verisini (self.p) paketler.
+        2. main.py'daki '/edit-property/ID' rotasına gönderir.
+        """
+        UIHelpers.show_toast(self.main_page, "Düzenleme moduna geçiliyor...", is_success=True)
+        
+        # 🚀 KRİTİK SATIR:
+        # Adresi değiştiriyoruz, main.py bunu yakalayıp AddPropertyView'ı 
+        # düzenleme modunda açacak.
+        self.main_page.go(f"/edit-property/{self.p.id}")

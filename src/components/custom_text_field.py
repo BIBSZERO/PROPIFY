@@ -1,4 +1,5 @@
 import flet as ft
+from typing import Optional, Callable, Any # 🚀 Any buraya eklendi
 
 class CustomTextField(ft.TextField):
     def __init__(
@@ -9,10 +10,16 @@ class CustomTextField(ft.TextField):
         is_numeric: bool = False,
         hint_text: str = "",
         expand: bool = False,
-        multiline: bool = False
+        multiline: bool = False,
+        value: str = "",
+        read_only: bool = False,
+        # 🚀 'any' yerine 'Any' (Büyük harf) yapıyoruz
+        on_change: Any = None 
     ):
         super().__init__(
             label=label,
+            value=value,
+            read_only=read_only,
             hint_text=hint_text,
             prefix_icon=icon,
             password=is_password,
@@ -26,9 +33,9 @@ class CustomTextField(ft.TextField):
             cursor_color=ft.Colors.BLUE_700,
             expand=expand,
             multiline=multiline,
+            on_change=on_change, # Buraya paslıyoruz
         )
         
-        # 🚀 Sayısal giriş (Fiyat, Aidat vb.) için geliştirme
         if is_numeric:
             self.keyboard_type = ft.KeyboardType.NUMBER
             self.input_filter = ft.NumbersOnlyInputFilter()

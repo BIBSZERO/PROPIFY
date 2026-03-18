@@ -7,7 +7,6 @@ from src.views.password_reset_view import PasswordResetView
 from src.views.add_property_view import AddPropertyView
 from src.views.add_client_view import AddClientView
 from src.views.portfolio_view import PortfolioView
-# 🚀 YENİ EKLENEN: Detay görünümü ve Servis
 from src.views.property_detail_view import PropertyDetailView
 from src.services.property_service import property_service
 
@@ -54,26 +53,36 @@ def main(page: ft.Page):
         elif current_route == "/portfolio":
             page.views.append(PortfolioView(page))
 
-        # 🏠 YENİ: PORTFÖY DETAY ROTASI
+        # 🏠 PORTFÖY DETAY ROTASI
         elif current_route.startswith("/property-detail/"):
-            # URL'den ID'yi ayıkla (Örn: /property-detail/abc-123 -> abc-123)
             prop_id = current_route.split("/")[-1]
-            
-            # Veritabanından (Servis üzerinden) tüm mülkleri çek ve eşleşeni bul
             all_props = property_service.get_all()
             selected_prop = next((p for p in all_props if p.id == prop_id), None)
             
             if selected_prop:
                 page.views.append(PropertyDetailView(page, selected_prop))
             else:
-                # Eğer ID hatalıysa veya mülk silindiyse portföye geri at
-                print(f"❌ Hata: {prop_id} ID'li mülk bulunamadı.")
+                page.go("/portfolio")
+
+        # ✍️ YENİ: DÜZENLEME MODU ROTASI
+        elif current_route.startswith("/edit-property/"):
+            # URL'den ID'yi alıyoruz
+            prop_id = current_route.split("/")[-1]
+            all_props = property_service.get_all()
+            selected_prop = next((p for p in all_props if p.id == prop_id), None)
+            
+            if selected_prop:
+                # 🚀 KRİTİK: AddPropertyView'ı 'edit_property' verisiyle çağırıyoruz
+                page.views.append(AddPropertyView(page, edit_property=selected_prop))
+            else:
+                print(f"❌ Hata: {prop_id} ID'li mülk düzenleme için bulunamadı.")
                 page.go("/portfolio")
 
         elif current_route == "/add-client":
             page.views.append(AddClientView(page))
             
         elif current_route == "/add-property":
+            # Burası yeni (boş) ilan ekleme için
             page.views.append(AddPropertyView(page))
             
         else:
@@ -89,7 +98,6 @@ def main(page: ft.Page):
 
     page.on_route_change = route_change
     page.on_view_pop = view_pop
-
     route_change(None)
 
 if __name__ == "__main__":
