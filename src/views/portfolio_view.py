@@ -1,9 +1,11 @@
 import flet as ft
+from typing import Optional
 from src.components.sidebar import SideBar
 from src.components.top_bar import TopBar
 from src.components.property_list_item import PropertyListItem
-from src.services.property_service import property_service # Küçük harf örneği kullanıyorsan buna dikkat
+from src.services.property_service import property_service
 from src.utils.ui_helpers import UIHelpers
+from src.models.properties import PropertyType, RoomCount # Enumlarımızı ekledik
 
 class PortfolioView(ft.View):
     def __init__(self, page: ft.Page):
@@ -16,7 +18,6 @@ class PortfolioView(ft.View):
         
         # 1. Verileri Çek
         try:
-            # Sayfa her açıldığında verileri tazeleyelim
             self.all_properties = property_service.get_all()
         except Exception as e:
             print(f"🚀 Veri çekme hatası: {e}")
@@ -45,6 +46,19 @@ class PortfolioView(ft.View):
             expand=True
         )
 
+        # 🛠️ Filtre Butonu (Container ile Şık Görünüm)
+        self.filter_button = ft.Container(
+            content=ft.IconButton(
+                ft.Icons.TUNE,
+                icon_color="#1A237E",
+                tooltip="Filtrele",
+                on_click=self.show_filter_sheet
+            ),
+            bgcolor=ft.Colors.WHITE,
+            border_radius=10,
+            border=ft.border.all(1, "#E0E0E0")
+        )
+
         # 3. Sayfa Düzeni (Layout)
         self.content_column = ft.Column([
             TopBar(self.main_page),
@@ -71,15 +85,10 @@ class PortfolioView(ft.View):
                     
                     ft.Divider(height=30, color="transparent"),
                     
-                    # Arama Satırı
+                    # 🔍 Arama ve Filtre Satırı (Düzenlendi)
                     ft.Row([
                         self.search_field,
-                        ft.Container(
-                            content=ft.IconButton(ft.Icons.TUNE, icon_color="#1A237E"),
-                            bgcolor=ft.Colors.WHITE,
-                            border_radius=10,
-                            border=ft.border.all(1, "#E0E0E0")
-                        )
+                        self.filter_button # Burası düzeltildi
                     ], spacing=15),
                     
                     ft.Divider(height=20, color="transparent"),
@@ -101,6 +110,68 @@ class PortfolioView(ft.View):
                 self.content_column
             ], expand=True, spacing=0)
         ]
+    
+    def show_filter_sheet(self, e):
+        """Filtreleme seçeneklerinin olduğu alt pencereyi açar."""
+        # Dropdown'lar (Dinamik Enum kullanımı)
+        self.type_filter = ft.Dropdown(
+            label="Mülk Tipi",
+            options=[ft.dropdown.Option("Hepsi")] + [ft.dropdown.Option(key=t.name, text=t.value) for t in PropertyType],
+            value="Hepsi",
+            border_radius=10
+        )
+
+        self.room_filter = ft.Dropdown(
+            label="Oda Sayısı",
+            options=[ft.dropdown.Option("Hepsi")] + [ft.dropdown.Option(key=r.name, text=r.value) for r in RoomCount],
+            value="Hepsi",
+            border_radius=10
+        )
+
+        def apply_filters(e):
+            """Seçilen filtrelere göre listeyi günceller."""
+            filtered = self.all_properties
+            
+            if self.type_filter.value != "Hepsi":
+                filtered = [p for p in filtered if p.property_type.name == self.type_filter.value]
+            
+            if self.room_filter.value != "Hepsi":
+                filtered = [p for p in filtered if p.room_count.name == self.room_filter.value]
+
+            self.property_list_column.controls = self.build_property_list(filtered)
+            self.filter_sheet.open = False
+            self.main_page.update()
+            UIHelpers.show_toast(self.main_page, "Filtreler uygulandı!", True)
+
+        # BottomSheet Tanımlama
+        self.filter_sheet = ft.BottomSheet(
+            ft.Container(
+                content=ft.Column([
+                    ft.Row([
+                        ft.Text("İlanları Filtrele", size=20, weight="bold", color="#1A237E"),
+                        ft.IconButton(ft.Icons.CLOSE, on_click=lambda _: setattr(self.filter_sheet, "open", False) or self.main_page.update())
+                    ], alignment="spaceBetween"),
+                    ft.Divider(),
+                    self.type_filter,
+                    self.room_filter,
+                    ft.ElevatedButton(
+                        "Filtreleri Uygula", 
+                        bgcolor="#1A237E", 
+                        color="white", 
+                        on_click=apply_filters,
+                        width=float("inf"),
+                        height=50
+                    ),
+                ], tight=True, spacing=20),
+                padding=30,
+                bgcolor="#F4F7F9",
+                border_radius=ft.border_radius.only(top_left=20, top_right=20)
+            )
+        )
+        
+        self.main_page.overlay.append(self.filter_sheet)
+        self.filter_sheet.open = True
+        self.main_page.update()
 
     def build_property_list(self, properties):
         """Mülk listesini oluşturur veya boş durum döner"""
@@ -122,15 +193,9 @@ class PortfolioView(ft.View):
         self.update()
 
     def on_property_click(self, property_data):
-        """
-        🚀 KRİTİK GÜNCELLEME: 
-        Doğrudan view append etmek yerine .go() kullanarak 
-        URL'nin /property-detail/ID şeklinde güncellenmesini sağlar.
-        """
         self.main_page.go(f"/property-detail/{property_data.id}")
 
     def build_empty_state(self):
-        """Sonuç bulunamadığında gösterilecek alan"""
         return ft.Container(
             content=ft.Column([
                 ft.Icon(ft.Icons.SEARCH_OFF_ROUNDED, size=80, color=ft.Colors.GREY_300),
