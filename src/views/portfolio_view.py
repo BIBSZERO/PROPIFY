@@ -2,8 +2,8 @@ import flet as ft
 from src.components.sidebar import SideBar
 from src.components.top_bar import TopBar
 from src.components.property_list_item import PropertyListItem
-from src.services.property_service import PropertyService
-from src.views.property_detail_view import PropertyDetailView
+from src.services.property_service import property_service # Küçük harf örneği kullanıyorsan buna dikkat
+from src.utils.ui_helpers import UIHelpers
 
 class PortfolioView(ft.View):
     def __init__(self, page: ft.Page):
@@ -16,15 +16,16 @@ class PortfolioView(ft.View):
         
         # 1. Verileri Çek
         try:
-            self.all_properties = PropertyService.get_all()
+            # Sayfa her açıldığında verileri tazeleyelim
+            self.all_properties = property_service.get_all()
         except Exception as e:
-            print(f"Veri çekme hatası: {e}")
+            print(f"🚀 Veri çekme hatası: {e}")
             self.all_properties = []
 
         # 2. Bileşenleri Başlat
         self.sidebar = SideBar(self.main_page)
         
-        # 🔍 Arama Çubuğu (Görsel olarak iyileştirildi)
+        # 🔍 Arama Çubuğu
         self.search_field = ft.TextField(
             hint_text="İlan başlığına göre hızlı ara...",
             prefix_icon=ft.Icons.SEARCH,
@@ -36,13 +37,10 @@ class PortfolioView(ft.View):
             expand=True
         )
 
-        # 🏗️ Liste Sütunu (İlanların alt alta dizileceği yer)
+        # 🏗️ Liste Sütunu
         self.property_list_column = ft.Column(
-            controls=[
-                PropertyListItem(p, self.on_property_click) 
-                for p in self.all_properties
-            ] if self.all_properties else [self.build_empty_state()],
-            spacing=5,
+            controls=self.build_property_list(self.all_properties),
+            spacing=10,
             scroll=ft.ScrollMode.ADAPTIVE,
             expand=True
         )
@@ -73,7 +71,7 @@ class PortfolioView(ft.View):
                     
                     ft.Divider(height=30, color="transparent"),
                     
-                    # Arama ve Filtre Satırı
+                    # Arama Satırı
                     ft.Row([
                         self.search_field,
                         ft.Container(
@@ -104,6 +102,13 @@ class PortfolioView(ft.View):
             ], expand=True, spacing=0)
         ]
 
+    def build_property_list(self, properties):
+        """Mülk listesini oluşturur veya boş durum döner"""
+        if not properties:
+            return [self.build_empty_state()]
+        
+        return [PropertyListItem(p, self.on_property_click) for p in properties]
+
     def filter_properties(self, e):
         """Arama kutusuna yazıldığında listeyi anında günceller"""
         search_term = self.search_field.value.lower().strip()
@@ -113,22 +118,19 @@ class PortfolioView(ft.View):
             if search_term in p.title.lower()
         ]
         
-        # Listeyi temizle ve yeni sonuçları ekle
-        self.property_list_column.controls = [
-            PropertyListItem(p, self.on_property_click) for p in filtered_list
-        ] if filtered_list else [self.build_empty_state()]
-        
+        self.property_list_column.controls = self.build_property_list(filtered_list)
         self.update()
 
     def on_property_click(self, property_data):
-        """İlana tıklandığında detay sayfasına yönlendirir"""
-        self.main_page.views.append(
-            PropertyDetailView(self.main_page, property_data)
-        )
-        self.main_page.update()
+        """
+        🚀 KRİTİK GÜNCELLEME: 
+        Doğrudan view append etmek yerine .go() kullanarak 
+        URL'nin /property-detail/ID şeklinde güncellenmesini sağlar.
+        """
+        self.main_page.go(f"/property-detail/{property_data.id}")
 
     def build_empty_state(self):
-        """Sonuç bulunamadığında gösterilecek görsel alan"""
+        """Sonuç bulunamadığında gösterilecek alan"""
         return ft.Container(
             content=ft.Column([
                 ft.Icon(ft.Icons.SEARCH_OFF_ROUNDED, size=80, color=ft.Colors.GREY_300),

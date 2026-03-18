@@ -6,6 +6,7 @@ class UIHelpers:
     PROPIFY Görsel Standartlar ve Yardımcı Araçlar.
     Uygulama genelinde tutarlı bir UI deneyimi sağlar.
     """
+
     @staticmethod
     def show_toast(page: ft.Page, text: str, is_success: bool = True):
         """Kullanıcıya hızlı geri bildirim veren SnackBar (Toast) mesajı."""
@@ -17,7 +18,7 @@ class UIHelpers:
                 margin=ft.margin.all(20),
                 duration=3000,
             )
-            page.add(snack)
+            page.overlay.append(snack)
             snack.open = True
             page.update()
         except Exception as e:
@@ -39,14 +40,14 @@ class UIHelpers:
                     spacing=20
                 )
             )
-            page.add(dialog)
+            page.overlay.append(dialog)
             dialog.open = True
+            page.update()
             return dialog
-        
         except Exception as e:
             print(f"❌ Loader hatası: {e}")
             return None
-        
+
     @staticmethod
     def close_dialog(page: ft.Page, dialog: ft.AlertDialog):
         """Spesifik bir diyalog penceresini güvenli bir şekilde kapatır."""
@@ -56,10 +57,44 @@ class UIHelpers:
                 page.update()
         except Exception as e:
             print(f"❌ Dialog kapatma hatası: {e}")
-    
+
+    @staticmethod
+    def show_confirm_dialog(page: ft.Page, title: str, message: str, on_confirm: Callable):
+        """
+        Kullanıcıdan onay alan (Evet/Hayır) standart bir pencere açar.
+        """
+        def close_dlg(e):
+            confirm_dlg.open = False
+            page.update()
+
+        def confirm_action(e):
+            confirm_dlg.open = False
+            page.update()
+            on_confirm()  # 'Evet' denirse dışarıdan gelen fonksiyonu çalıştırır.
+
+        confirm_dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(title, weight=ft.FontWeight.BOLD),
+            content=ft.Text(message),
+            actions=[
+                ft.TextButton("Vazgeç", on_click=close_dlg),
+                ft.ElevatedButton(
+                    "Evet, Onaylıyorum", 
+                    bgcolor=ft.Colors.RED_700, 
+                    color=ft.Colors.WHITE, 
+                    on_click=confirm_action
+                ),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        
+        page.overlay.append(confirm_dlg)
+        confirm_dlg.open = True
+        page.update()
+
     @staticmethod
     def create_stat_card(title: str, value: str, icon: ft.IconData, color: str = ft.Colors.BLUE_700) -> ft.Container:
-        """Dashboard üzerindeki özet bilgi kartları (İlan Sayısı, Randevular vb.)."""
+        """Dashboard üzerindeki özet bilgi kartları."""
         return ft.Container(
             content=ft.Column([
                 ft.ListTile(

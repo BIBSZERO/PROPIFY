@@ -1,5 +1,4 @@
 import flet as ft
-
 from typing import Optional
 
 from src.views.login_view import LoginView
@@ -8,6 +7,9 @@ from src.views.password_reset_view import PasswordResetView
 from src.views.add_property_view import AddPropertyView
 from src.views.add_client_view import AddClientView
 from src.views.portfolio_view import PortfolioView
+# 🚀 YENİ EKLENEN: Detay görünümü ve Servis
+from src.views.property_detail_view import PropertyDetailView
+from src.services.property_service import property_service
 
 def main(page: ft.Page):
     page.title = "PROPIFY"
@@ -20,7 +22,6 @@ def main(page: ft.Page):
         "user_name": "Buse İbşiroğlu"
     }
     
-    # 1. HATA ÖNLEME: Varsayılan rotayı belirleyelim
     if not page.route:
         page.route = "/"
 
@@ -28,22 +29,16 @@ def main(page: ft.Page):
         current_route = page.route
         print(f"🕵️ Gelen Rota: {current_route}")
         
-        # 💡 %100 GARANTİ MANTIK:
-        # Metodları veya iterable özelliğini sorgulamak yerine 
-        # doğrudan değeri çekmeyi deniyoruz.
         token = None
         try:
-            # Query nesnesinden token'ı en sade haliyle istiyoruz
             token = page.query.get("token")
         except:
             pass
         
         page.views.clear()
 
-        # 🚀 OTOMATİK GİRİŞ MANTIĞI:
-        # Eğer rota ana sayfa (/) veya login ise doğrudan Dashboard'a git
+        # 🚀 ROTASYON MANTIĞI:
         if current_route == "/" or current_route == "/login":
-            page.route = "/dashboard" # Rotayı güncelle
             page.views.append(DashboardView(page))
         
         elif token:
@@ -56,8 +51,24 @@ def main(page: ft.Page):
         elif current_route == "/dashboard":
             page.views.append(DashboardView(page))
         
-        elif page.route == "/portfolio":
+        elif current_route == "/portfolio":
             page.views.append(PortfolioView(page))
+
+        # 🏠 YENİ: PORTFÖY DETAY ROTASI
+        elif current_route.startswith("/property-detail/"):
+            # URL'den ID'yi ayıkla (Örn: /property-detail/abc-123 -> abc-123)
+            prop_id = current_route.split("/")[-1]
+            
+            # Veritabanından (Servis üzerinden) tüm mülkleri çek ve eşleşeni bul
+            all_props = property_service.get_all()
+            selected_prop = next((p for p in all_props if p.id == prop_id), None)
+            
+            if selected_prop:
+                page.views.append(PropertyDetailView(page, selected_prop))
+            else:
+                # Eğer ID hatalıysa veya mülk silindiyse portföye geri at
+                print(f"❌ Hata: {prop_id} ID'li mülk bulunamadı.")
+                page.go("/portfolio")
 
         elif current_route == "/add-client":
             page.views.append(AddClientView(page))
@@ -66,7 +77,6 @@ def main(page: ft.Page):
             page.views.append(AddPropertyView(page))
             
         else:
-            # Diğer her durumda Login'e git (Güvenlik için)
             page.views.append(LoginView(page))
         
         page.update()
@@ -77,19 +87,15 @@ def main(page: ft.Page):
             top_view = page.views[-1]
             page.go(top_view.route)
 
-    # 2. KRİTİK: Olayları bağla
     page.on_route_change = route_change
     page.on_view_pop = view_pop
 
-    # 3. ZORLA TETİKLE: Sayfa ilk açıldığında route_change'i manuel çağır
     route_change(None)
 
 if __name__ == "__main__":
-    # view=ft.AppView.WEB_BROWSER ekleyerek tarayıcıda açılmasını sağlıyoruz
     ft.app(
-            target=main, 
-            assets_dir="assets",
-            view=ft.AppView.WEB_BROWSER,
-            port=8000 # Tarayıcıda açar
-        )
-
+        target=main, 
+        assets_dir="assets",
+        view=ft.AppView.WEB_BROWSER,
+        port=8000
+    )
